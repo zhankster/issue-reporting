@@ -1,0 +1,73 @@
+<form method="POST" action="javascript:validateForm()" id="frmCode" ></form>
+<form method="POST" action="{{url_for('admin_codes')}}" id="frmCode" ></form>
+
+    <!-- $( "#frmCode" ).submit(function( event ) {
+      if ( validateForm()) {
+        //$( "span" ).text( "Validated..." ).show();
+        return;
+      }
+      alert("Success");
+      event.preventDefault();
+    }) -->
+    // $(document)
+    //   .on('click', '#frmCode button[type=submit]', function(e) {
+    //       validateForm()
+    //       if(!isValid) {
+    //         e.preventDefault(); //prevent the default action
+    //       }
+    //   });
+
+<div class="  justify-content-start">.Start</div>
+<div class="  justify-content-end">End</div>
+<div class="  justify-content-center">Center</div>
+<div class="  justify-content-between">Between</div>
+<div class="  justify-content-around">Around</div>
+
+<div class="d-flex justify-content-start">.Start</div>
+<div class="d-flex justify-content-end">End</div>
+<div class="d-flex justify-content-center">Center</div>
+<div class="d-flex justify-content-between">Between</div>
+<div class="d-flex justify-content-around">Around</div>
+
+<div class="d-flex">
+    <div class="  justify-content-start">.Start</div>
+    <div class="  justify-content-end">End</div>
+    <div class="  justify-content-center">Center</div>
+    <div class="  justify-content-between">Between</div>
+    <div class="  justify-content-around">Around</div>
+    </div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <a href="#" class="navbar-brand">
+            <img src="static/images/ihs-pharmacy-logo.png" height="28" alt="Occurrence Report">
+            Reporting
+        </a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav mr-auto">
+                <a href="#" class="nav-item nav-link active" id="navOccur">Occurrence</a>
+                <a href="#" class="nav-item nav-link" id="navAdmin">Misc</a>
+                <div class="nav-item dropdown" id="navAdmin">
+                    <a  class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Admin
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">          
+                        <!-- <a class="dropdown-item" href="{{url_for('admin_kickback')}}">Facility Kick-Back</a>  -->
+                        <a class="dropdown-item" href="" id="navException">Batch Viewer</a>
+                        <a class="dropdown-item" href="" id="navException">Exception Manager</a>
+                        <a class="dropdown-item" href="">User Manager</a> 	
+                        <div class="dropdown-divider"></div>          
+                        <a class="dropdown-item" href="">Exception Code Manager</a>
+                        <a class="dropdown-item" href="">Facility Configuration</a>		                                   
+                    </div>
+                </div>
+            </div>
+            <div class="navbar-nav ml-auto">
+                <a href="#" class="nav-item nav-link" id="navLogin">Login</a>
+                <a href="#" class="nav-item nav-link" id="navAdmin">Admin</a>
+            </div>
+        </div>
+    </nav>

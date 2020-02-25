@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block body %}
+<script type="text/javascript">
+	var nav = document.getElementById("navAdmin");
+	nav.className += " active";
+	nav.style.fontWeight = "bold";
+</script>
+<br/>
+<br/>
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<h1 style="color:#254878;">User Manager</h1>
+			<br/>
+		</div>
+    </div>
+	<div class="row">
+		<div class="col">
+			<button type="button" class="btn btn-primary" data-toggle="modal" onclick="reset_user()" data-target="#addUser">
+			Add User
+			</button>
+		</div>
+	</div>
+	<br/>
+	<div class="row">
+		<div class="col">
+			<table class="table table-striped">
+				<thead class="thead-dark">
+					<tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Position</th>
+						<th scope="col">Initials</th>
+						<th scope="col"></th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for u in users %}
+					<tr>
+						<th scope="row">
+							{{ u['username'] }}
+							<input type="hidden" id="{{ u['id'] }}_username" name="{{ u['id'] }}_username" value="{{ u['username'] }}"/>
+							<input type="hidden" id="{{ u['id'] }}_password" name="{{ u['id'] }}_password" value="{{ u['password'] }}"/>
+							<input type="hidden" id="{{ u['id'] }}_active" name="{{ u['id'] }}_active" value="{{ u['active'] }}"/>					
+                        </th>
+                        <th scope="row">
+							{{ u['firstname'] }}
+							<input type="hidden" id="{{ u['id'] }}_firstname" name="{{ u['id'] }}_firstname" value="{{ u['firstname'] }}"/>	
+                        </th>
+                        <th scope="row">
+							{{ u['lastname'] }}
+							<input type="hidden" id="{{ u['id'] }}_lastname" name="{{ u['id'] }}_lastname" value="{{ u['lastname'] }}"/>	
+                        </th>
+                        <th scope="row">
+							{{ u['position'] }}
+							<input type="hidden" id="{{ u['id'] }}_position" name="{{ u['id'] }}_position" value="{{ u['position'] }}"/>	
+							<input type="hidden" id="{{ u['id'] }}_role" name="{{ u['id'] }}_role" value="{{ u['role'] }}"/>
+                        </th>
+                        <th scope="row">
+							{{ u['initials'] }}
+							<input type="hidden" id="{{ u['id'] }}_initials" name="'{{ u['id'] }}_initials'" value="{{ u['initials'] }}"/>
+						</th>
+						<td>
+							<a id='edit-user' href="#" onclick="edit_user('{{u['id']}}')">Edit</a>
+						</td>
+						<td><a id='delete-user' href="#" onclick="delete_user('{{u['id']}}', '{{u['username']}}')">Delete</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div id="addUser" class="modal fade" tabindex="-1" role="dialog">
+<form method="POST" action="{{url_for('admin_users')}}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title">Add User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<label for="txtUsername" class="col-sm-2 col-form-label">Username</label>
+			<div class="col-sm-10">
+				<input type="username" class="form-control" name="txtUsername" id="txtUsername" placeholder="Username">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtFirstNam" class="col-sm-2 col-form-label">First Name</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="txtFirstname" id="txtFirstname" placeholder="First Name">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtLastName" class="col-sm-2 col-form-label">Last Name</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="txtLastname" id="txtLastname" placeholder="Last Name">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtPassword" class="col-sm-2 col-form-label">Password</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="txtPassword" id="txtPassword" placeholder="Password if changed or new">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtPasswordV" class="col-sm-2 col-form-label"></label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="txtPasswordV" id="txtPasswordV" placeholder="Re-enter if changed or new">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtxInitals" class="col-sm-2 col-form-label">Initials</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="txtInitials" id="txtInitials" placeholder="Initials">
+			</div>
+        </div>
+        <div class="form-group row">
+			<label for="selPosition" class="col-sm-2 col-form-label">Position</label>
+			<div class="col-sm-10">
+				<select id="selPosition" name="selPosition" class="form-control">
+					<option value="RPH">RPH</option>
+					<option value="Pharm Tech">Pharm Tech</option>
+                    <option value="Ship Tech">Ship Tech</option>
+					<option value="Accounting">Accounting</option>
+					<option value="Dev">Dev</option>
+					<option value=""></option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="selRole" class="col-sm-2 col-form-label">ROLE</label>
+			<div class="col-sm-10">
+				<select id="selRole" name="selRole" class="form-control">
+					<option value="1">Administrator</option>
+					<option value="2">User</option>
+					<option value="3">PharmTech</option>
+					<option value="4">ShipTech</option>
+					<option value="5">Admin</option>
+					<option value=""></option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<div class="col-sm-2"><span id='sActive'>Active</span></div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="active" name="active">		
+						<input type="hidden" id="op-code" name="op-code"/>
+						<input type="hidden" id="user-id" name="user-id"/>
+					</div>
+				</div>
+			</div>
+      </div>
+      <div class="modal-footer justify-content-between">
+			<p class="float-left" id="errMsg" style="font-weight: bold; color:red"></p>
+		<div>
+        <button type="button" class="btn btn-primary" onclick="validateForm()">Save</button>
+		<button type="button" class="btn btn-light ml-2" data-dismiss="modal">Cancel</button>
+		</div>
+      </div>
+    </div>
+  </div>
+ </form>
+</div>
+<!-- UTIL Modal -->
+<div class="modal fade" id="delUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <form method="POST" action="{{url_for('admin_users')}}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">DELETE USER</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<div class="col-sm-12">
+			Are you sure want to delete &nbsp;<span id="delUserName" style="font-weight: bold;"></span>
+			<br /><br />
+			<p style="font-weight: bold; color:red; padding: 6px">Setting the user inactive instead will prevent possible reporting issues</p>
+		 </div>
+      </div>
+      <div class="modal-footer">
+		<input type='hidden' id='op-code' name="op-code"/>
+		<input type='hidden' id='del_user_id' name="del_user_id"/>
+        <button type="submit" class="btn btn-danger">DELETE</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">CANCEL</button>
+      </div>
+    </div>
+  </div>
+ </form>
+</div>
+
+<script type="text/javascript">
+
+	function edit_user(user) {
+		$('.modal-title').html('Update User');
+		$('#addUser').modal('show');
+		$('#user-id').val(user);
+		$('#txtUsername').val($("#" + user + "_username").val());
+		$('#txtFirstname').val($("#" + user + "_firstname").val());
+		$('#txtLastname').val($("#" + user + "_lastname").val());
+		$('#txtInitials').val($("#" + user + "_initials").val());
+		$('#selPosition').val($("#" + user + "_position").val());
+		$('#selRole').val($("#" + user + "_role").val());
+		$('#active').show();
+		$('#sActive').show()
+		$('#active').prop('checked', $("#" + user + "_active").val());
+		$('#op-code').val('update');
+	}
+	
+	function delete_user(userid, username) {		
+		$('#delUser').modal('show');
+		$('#delUser #op-code').val('delete');
+		$('#delUser #del_user_id').val(userid);
+		$('#delUser #delUserName').html(username + " ?");
+	}
+
+	function reset_user() {
+		$('.modal-title').html('Add User');
+		$('#addUser').modal('show');
+		$('#user-id').val("");
+		$('#txtUsername').val("");
+		$('#txtFirstname').val("");
+		$('#txtLastname').val("");
+		$('#txtInitals').val("");
+		$('#selPosition').val("");
+		$('#txtPassword').val("");
+		$('#selRole').val("");
+		$('#active').hide();
+		$('#sActive').hide();
+		$('#active').prop('checked', true);
+		$('#op-code').val('insert');
+}
+
+function validateForm(){
+	var opcode = $('#op-code').val(); 
+	var user = "0"    
+	var username = $('#txtUsername').val().trim();
+	var firstname = $('#txtFirstname').val().trim();
+	var lastname = $('#txtLastname').val().trim();
+	var initials = $('#txtInitials').val().trim();
+	var position = $('#selPosition').val().trim();
+	var role = $('#selRole').val().trim();
+	var password = $('#txtPassword').val().trim();
+	var passwordV = $('#txtPasswordV').val().trim();
+	var active = 1;
+
+	console.log(opcode);
+
+	var msg = "";
+
+	if (username.trim() == "") {
+		msg += 'Username is required<br />';
+	}
+
+	if (firstname.trim() == "") {
+		msg += 'First Name is required<br />';
+	}
+
+	if (lastname.trim() == "") {
+		msg += 'Last Name is required<br />';
+	}
+
+	if (position.trim() == "") {
+		msg += 'Position is required<br />';
+	}
+
+	if (password.trim() == "" && opcode === 'insert')  {
+		msg += 'Password is required<br />';
+	}
+
+	if (password.trim() !== "" )  {
+		if (password.trim() !== passwordV.trim())
+		msg += 'The passwords do not match<br />';
+	}
+
+	if (role.trim() == "") {
+		msg += 'Role is required<br />';
+	}
+
+	if (msg !== "") {
+		$('#errMsg').html(msg);
+		return false;
+	}
+	else {
+		if (opcode === 'edit') {
+			if ($(this).prop("#active") == true) {
+				active = 1
+			}
+			else {
+				active = 0
+			}
+		}
+
+		user = $('#user-id').val();
+
+		$.ajax({
+			type: "POST",
+			url: "{{url_for('admin_users')}}",
+			dataType: 'json',
+			data: {
+				'user-id': user
+				,'txtUsername': username
+				,'txtFirstname': firstname
+				,'txtLastname': lastname
+				,'selPosition': position
+				,'txtPassword': password
+				,'selRole': role
+				,'op-code': opcode
+				,'active': active
+				,'txtInitials': initials
+			},
+			async: false,
+			success: function (data) {
+			},
+			complete: function (data) {
+				location.reload();
+			}
+			
+		});
+
+		return true;
+	}
+}
+
+</script>
+{% endblock %}

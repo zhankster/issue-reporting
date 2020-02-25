@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block body %}
+<script type="text/javascript">
+	var nav = document.getElementById("navAdmin");
+	nav.className += " active";
+	nav.style.fontWeight = "bold";
+</script>
+<br/>
+<br/>
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<h1 style="color:#254878;">Reason Codes</h1>
+			<br/>
+		</div>
+    </div>
+  <input type="hidden"  id="mainCatCode" value= "{{ category_code }}" />
+	<div class="row">
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-primary" data-toggle="modal" onclick="resetForm()" data-target="#addCode">
+                Add New Code
+            </button>
+        </div>
+        <div class="col-sm-4">
+            <span>Categories</span>
+            <select class="" id="selCategories" name="selCategories" onchange="changeCategory()">
+                {% for c in categories %}
+                <option value="{{ c['code'] }}">{{ c['description'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+	</div>
+	<br/>
+	<div class="row">
+		<div class="col">
+			<table class="table"  id="tblCodes">
+				<thead class="thead-dark">
+					<tr>
+						<th scope="col">Description</th>
+						<th scope="col">Sort Order</th>
+                        <th scope="col">Active</th>
+                        <th scope="col">Category</th>
+                        <th scope="col" colspan="2"></th>
+					</tr>
+				</thead>
+				<tbody>
+          {% for c in codes %}
+					<tr>
+						<th scope="row">
+                {{ c['description'] }}
+                <input type="hidden"  id="{{ c['code'] }}_desc" value= "{{ c['description'] }}" />	
+                <input type="hidden"  id="{{ c['code'] }}_category" value= "{{ c['category_code'] }}" />								
+            </th>
+            <td>
+                {{ c['sort_order'] }}
+                <input type="hidden"  id="{{ c['code'] }}_sort" value= "{{ c['sort_order'] }}" />	
+            </td>
+            <td>
+                {{ c['active'] }}
+                <input type="hidden"  id="{{ c['code'] }}_active" value= "{{ c['active'] }}" />	
+            </td>
+            <td class="tdCategory">
+                {{ c['category'] }}
+                <input type="hidden"  id="{{ c['code'] }}_catDesc" value= "{{ c['category'] }}" />	
+            </td>
+						<td>
+							<a id='edit-user' href="#" onclick="edit_user('{{c['code']}}')">Edit</a>
+						</td>
+						<td><a id='delete-user' href="#" onclick="delete_code({{c['code']}}, '{{c['description']}}', '{{ c['category_code'] }}', '{{ c['category'] }}')">Delete</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<!-- ADD CODE MODAL -->
+<div id="addCode" class="modal fade" tabindex="-1" role="dialog">
+<form id="frmCode" ></form>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="mtCode">Add Reason</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<label for="txtDesc" class="col-sm-2 col-form-label">Description</label>
+			<div class="col-sm-10">
+        <input type="text" class="form-control" name="txtDesc" id="txtDesc" placeholder="">
+			</div>
+        </div>
+        <div class="form-group row">
+			<label for="txtSort" class="col-sm-2 col-form-label">Sort Order</label>
+			<div class="col-sm-10">
+				<input type="number" class="form-control" name="txtSort" id="txtSort" placeholder="Enter Number">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="selCategory" class="col-sm-2 col-form-label">Category</label>
+			<div class="col-sm-10">
+				<select id="selCategory" name="selCategory" class="form-control">
+                    {% for c in categories %}
+                    <option value="{{ c['code'] }}">{{ c['description'] }}</option>
+                    {% endfor %}
+                    <option value=""></option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<div class="col-sm-2" id="tActive">Active</div>
+				<div class="col-sm-10">
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" id="active" name="active">		
+						<input type="hidden" id="op-code" name="op-code"/>
+						<input type="hidden" id="code-id" name="code-id"/>
+					</div>
+				</div>
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="validateForm()" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <div>
+        <p id="errMsg" style="font-weight: bold; color:red"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+ </form>
+</div>
+<!-- UTIL Modal -->
+<div class="modal fade" id="delUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <form method="POST" action="{{url_for('admin_codes')}}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Code</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<div class="col-sm-10">
+      Are you sure want to delete &nbsp;<span id="delUserName" style="font-weight: bold;"></span>
+      <br />
+      In category: &nbsp;<span id="delCategory" style="font-weight: bold;"></span>
+      <br /><br />
+      <p style="font-weight: bold; color:red">Setting the code inactive instead will prevent possible reporting issues</p>
+			</div>
+      </div>
+      <div class="modal-footer">
+		  <input type='hidden' id='op-code' name="op-code"/>
+      <input type='hidden' id='del_code' name="del_code"/>
+      <input type='hidden' id='delCatCode' name="delCatCode"/>
+        <button type="submit" class="btn btn-danger">DELETE</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">CANCEL</button>
+      </div>
+    </div>
+  </div>
+ </form>
+</div>
+<script type="text/javascript">
+
+  function changeCategory() {
+        filterTable($("#selCategories option:selected" ).text());
+      }
+
+      function filterTable(val) {
+        // Declare variables
+        var input, filter, table, tr, td, i, txtValue;
+        //input = document.getElementById("myInput");
+        input = val;
+        filter = input.toUpperCase();
+        table = document.getElementById("tblCodes");
+        tr = table.getElementsByTagName("tr");
+      
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+          //td = tr[i].getElementsByClassName("tdCategory")[0];'
+          td = tr[i].getElementsByTagName("td")[2];
+          if (td) {
+            //console.log(tr[i].getElementsByTagName("td")[2]);
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }
+        }
+      }
+
+  $(function() {
+    var sel = document.getElementById("selCategories");
+    //sel.options[sel.selectedIndex].value = "{{ category_code}}"
+    var text= sel.options[sel.selectedIndex].text;
+    //var text = $("#mainCatCode").val();
+    filterTable(text);
+  });
+
+	function edit_user(code) {
+        $('#mtCode').html('Update Reason Code');
+        $('#addCode').modal('show');
+        $('#code-id').val(code); ;
+        $('#op-code').val("edit");        
+        $('#txtDesc').val($("#" + code + "_desc").val());
+        $('#txtSort').val($("#" + code + "_sort").val());
+        $('#selCategory').val($("#selCategories").val());
+        $('#active').show();
+        $('#tActive').show()
+        $('#active').prop('checked', $("#" + code + "_active").val());
+        $('#errMsg').val("");
+    }
+	
+	function delete_code(code, desc, cat_code,category) {		
+        $('#delUser').modal('show');
+        $('#delUser #op-code').val('delete');
+        $('#delUser #del_code').val(code);
+        $('#delUser #delUserName').html(desc);
+        $('#delUser #delCategory').html(category)
+        $('#delUser #delCatCode').val(cat_code);
+    }
+    
+    function resetForm(){
+        $('#mtCode').html('Add New Reason Code');
+        $('#code-id').val("");
+        $('#op-code').val("insert");      
+        $('#txtDesc').val("");
+        $('#txtSort').val("");
+        $('#selCategory').val("");
+        $('#active').prop('checked', true);
+        $('#active').hide();
+        $('#tActive').hide();
+        $('#errMsg').html("");
+    }
+
+    function validateForm(){
+
+        var opcode = $('#op-code').val(); 
+        var code = $('#code-id').val();     
+        var desc = $('#txtDesc').val();
+        var sort = $('#txtSort').val();
+        var sort_num = 0;
+        var cat = $('#selCategory  option:selected').val();
+        var active = 1;
+
+        console.log(opcode);
+
+        var msg = "";
+
+        if (desc.trim() == "") {
+            msg += 'A description is required<br />';
+        }
+
+        //Number.isInteger(value)
+        //
+        if(isNaN(sort) || sort.trim() === ""){
+            msg += "A numeric value is required for sort order<br />";
+            console.log("Sort1");
+        }
+        else {
+            sort_num = Number(sort);
+            console.log("Sort");
+            console.log("Sort: " + sort);
+            console.log("Sort Num: " + sort_num);
+
+        }
+
+        if (Number.isInteger(sort_num) === false){
+            msg += "An integer value is required for sort order<br />";
+        }
+
+        if (cat.trim() == "") {
+            msg += "A category is required<br />";
+        }
+
+        if (msg !== "") {
+            $('#errMsg').html(msg);
+            return false;
+        }
+        else{
+          if (opcode === 'edit')
+          {
+            if ($(this).prop("#active") == true){
+              active = 1
+            }
+            else {
+              active = 0
+            }
+          } 
+        
+
+          $.ajax({
+              type: "POST",
+              url: "{{url_for('admin_codes')}}",
+              dataType: 'json',
+              data: {
+                  'code-id': code
+                  ,'selCategory': cat
+                  ,'txtSort': sort
+                  ,'txtDesc': desc
+                  ,'op-code': opcode
+                  ,'active': active
+              },
+              async: false,
+              success: function (data) {
+              },
+              complete: function (data) {
+                  location.reload();
+            }
+          });
+
+          return true;
+        }
+    }
+
+</script>
+{% endblock %}

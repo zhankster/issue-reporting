@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Occurrences</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <div class="bs-example container">
+        <!-- <nav class="navbar navbar-expand-md navbar-light bg-light"> -->
+            <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+            <a href="#" class="navbar-brand">
+                <img src="images/ihs-pharmacy-logo.png" height="28" alt="Occurrence Report">
+                Occurrence Report
+            </a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <!-- <a href="#" class="nav-item nav-link active">Home</a> -->
+                </div>
+                <div class="navbar-nav ml-auto">
+                    <a href="#" class="nav-item nav-link">Login</a>
+                </div>
+            </div>
+        </nav>
+        <form class="main-form">
+        <div class="form-group row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="dateReport" class="small">Date Discovered or Reported to IHS </label>
+                    <input type="date" class="form-control form-control-sm" id="dateReport" name="dateReport" placeholder="Report Date">
+                </div>
+            </div>
+            <div class="col-md-4">
+                &nbsp;     
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="dateOccur" class="small">Date of Occurrence </label>
+                    <input type="date" class="form-control form-control-sm" id="dateOccur" name="dateOccur" placeholder="Occurrence Date">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2">
+            <label for="selFac" class="small">Facility Code</label>
+                <select class="form-control form-control-sm" id="selFac" name="selFac">
+                    <option></option>
+                    <option>AG</option>
+                    <option>BRS</option>
+                    <option>CH</option>
+                    <option>CG</option>
+                    <option>DG</option>
+                    <option>EG</option>
+                </select>
+            </div>
+            <div class="col-sm-5">
+                <label for="txtFac" class="small">Facility Name</label>
+                <input type="text" readonly class="form-control form-control-sm" id="txtFac" name="txtFac"placeholder="" />
+            </div>
+            <div class="offset-md-1 col-sm-4">
+                <label for="txtPatient" class="small">Patient Name</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPatient"" name="txtPatient" placeholder="" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="txtPerRept" class="small">Person Reporting occurrence</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPerRept" name="txtPerRept" placeholder="" />
+            </div>
+            <div class="col-sm-3">
+                <label for="txtPhone" class="small">Phone</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPhone"" name="txtPhone" placeholder="" />
+            </div>
+            <div class="col-sm-5">
+                <label for="selIntake" class="small">Person completing occurrence report</label>
+                <select type="text"  class="form-control form-control-sm" id="selIntake" name="selIntake">
+                    <option></option>
+                    <option>Andi Givens</option>
+                    <option>Ashely Ingram</option>
+                    <option>Brandi Justice</option>
+                    <option>Bryan Teat</option>
+                </select>
+            </div>
+        </div>
+    <hr>
+    <div class="d-flex justify-content-center"><h5>Types of Occurrences</h5></div>
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selIntake" class="small">Order Intake</label>
+            <select type="text"  class="form-control form-control-sm" id="selIntake" name="selIntake">
+                <option></option>
+                <option>Mar info incorrect</option>
+                <option>Active Rx info sent/received</option>
+                <option>Orders not received/entered</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selMed" class="small">Medication</label>
+            <select type="text"  class="form-control form-control-sm" id="selMed" name="selMed" >
+                <option></option>
+                <option>Out of Meds</option>
+                <option>Too few meds</option>
+                <option>Expired Meds</option>
+                <option>Dosing schedule wrong</option>
+                <option>Wrong med</option>
+                <option>Wrong med strength</option>
+                <option>Wrong script</option>
+                <option>Wrong start date</option>
+                <option>Formulary not followed</option>
+                <option>Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selShipping" class="small">Shipping</label>
+            <select type="text"  class="form-control form-control-sm" id="selShipping" name="selShipping">
+                <option></option>
+                <option>Wrong Address</option>
+                <option>Wrong label on med box</option>
+                <option>Med label in wrong place</option>
+                <option>Meds sent to wrong facility</option>
+                <option>Delivery sheet omitted</option>
+                <option>Delivery sheet incorrect</option>
+                <option>MAR not sent</option>
+                <option>Wrong MAR sent</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selDelivery" class="small">Delivery</label>
+            <select type="text"  class="form-control form-control-sm" id="selDelivery" name="selDelivery" >
+                <option></option>
+                <option>Late delivery</option>
+                <option>Wrong address</option>
+                <option>Crushed box</option>
+                <option>Opened box</option>
+                <option>Wrong med</option>
+                <option>Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selBilling" class="small">Billing</label>
+            <select type="text"  class="form-control form-control-sm" id="selBilling" name="selBilling">
+                <option></option>
+                <option>Wrong prices</option>
+                <option>Wrong patient on bill</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selCooking" class="small">Cooking</label>
+            <select type="text"  class="form-control form-control-sm" id="selCooking" name="selCooking" >
+                <option></option>
+                <option>Label does not match drug</option>
+                <option>Wrong Qty</option>
+                <option>Wrong type of card used</option>
+                <option>Each dose not cooked on separte card</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selTechInv" class="small">Tech Invovled</label>
+            <select type="text"  class="form-control form-control-sm" id="selTechInv" name="selTechInv">
+                <option></option>
+
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selRphInv" class="small">RPH Invovled</label>
+            <select type="text"  class="form-control form-control-sm" id="selRphInv" name="selRphInv" >
+                <option></option>
+ 
+            </select>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center  mb-3">
+        <div class="form-group row">
+            <label for="txtExp">Explanation</label>
+            <textarea class="form-control" rows="6" cols=60" id="txtExp" name="txtExp" sy></textarea>
+            <p syt></p>
+        </div> 
+    </div>
+    <div class="d-flex justify-content-around  mb-3">
+            <div class="p-2 bg-info"><button type="submit" class="btn btn-primary rounded">Submit</button></div>
+            <div class="p-2 bg-info"><button type="button" class="btn btn-secondary">Clear Form</button></div>
+    </div>
+
+    </form>
+    </div>
+
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

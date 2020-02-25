@@ -1,0 +1,54 @@
+.main-form {
+    margin-top: .5em;
+}
+
+label.sm {
+    font-size: 1em;
+}
+
+::placeholder {
+    color: rgba(247, 244, 250);
+    font-size: .75em;
+}
+
+.info-block{
+    border: solid #000000 .20em;
+    background-color:#f5f5fc;
+    margin-left: 3em;
+    margin-right: 1.75em;
+    font-size: .75em;
+    text-align: center;
+    cursor: pointer;
+}
+
+.search-block {
+    border: solid #000000 .20em;
+    border-radius: .4em;
+    background-color:#007BFF;
+    color: #FFFFFF;
+    cursor: pointer;
+    /* margin-left: 1em; */
+    margin-right: .75em;
+    font-size: .75em;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ::-webkit-input-placeholder {
+
+    color: rgba(247, 244, 250, 0.87);
+}
+
+::-moz-placeholder {
+
+    color: rgba(247, 244, 250, 0.87);
+}
+
+:-ms-input-placeholder {
+
+    color: rgba(247, 244, 250, 0.87);
+}
+
+:-moz-placeholder {
+    color: rgba(247, 244, 250, 0.87);
+} */

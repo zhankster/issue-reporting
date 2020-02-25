@@ -1,0 +1,657 @@
+{% extends "base.html" %}
+{% block body %}
+</style>
+<script type="text/javascript">
+	var nav = document.getElementById("navOccur");
+	nav.className += " active";
+    nav.style.fontWeight = "bold";
+</script>
+        <form class="main-form">
+        <div class="d-flex justify-content-between row">
+            <div class="col-sm-2">
+                <div class="w-75  info-block" id="dMode" title="Click to clear form">
+                Add Mode
+                </div>
+            </div>  
+            <div class="col-sm-2">
+                <div class="w-75  search-block" id="dSearch" onclick="openSearch()">
+                    Search
+                </div>
+            </div>          
+        </div>
+        <hr />
+        <div class="form-group row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="dateReport" class="small">Date Discovered or Reported to IHS </label>
+                    <input type="date" class="form-control form-control-sm" id="dateReport" name="dateReport" placeholder="Report Date">
+                </div>
+            </div>
+            <div class="col-md-4">
+                &nbsp;     
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="dateOccur" class="small">Date of Occurrence </label>
+                    <input type="date" class="form-control form-control-sm" id="dateOccur" name="dateOccur" placeholder="Occurrence Date">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2">
+            <label for="selFac" class="small">Facility Code</label>
+                <select class="form-control form-control-sm" id="selFac" name="selFac" onchange="get_fac_name()">
+                    <option value=""></option>
+                    {%- for f in facilities %}
+                        <option value="{{ f.name }}">{{ f.code }}</option>
+                    {%- endfor -%}
+                </select>
+            </div>
+            <div class="col-sm-5">
+                <label for="txtFac" class="small">Facility Name</label>
+                <input type="text" readonly style="background-color: #fdfdff" class="form-control form-control-sm" id="txtFac" name="txtFac" placeholder="" />
+            </div>
+            <div class="offset-md-1 col-sm-4">
+                <label for="txtPatient" class="small">Patient Name</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPatient" name="txtPatient" placeholder="" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <label for="txtPerRept" class="small">Person Reporting occurrence</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPerRept" name="txtPerRept" placeholder="" />
+            </div>
+            <div class="col-sm-3">
+                <label for="txtPhone" class="small">Phone</label>
+                <input type="text"  class="form-control form-control-sm" id="txtPhone" name="txtPhone" placeholder="" />
+            </div>
+            <div class="col-sm-5">
+                <label for="selPerComp" class="small">Person completing occurrence report</label>
+                <select type="text"  class="form-control form-control-sm" id="selPerComp" name="selPerComp">
+                    <option value='0'></option>
+                    <option value='Andi Givens'>Andi Givens</option>
+                    <option value='Ashely Ingram'>Ashely Ingram</option>
+                    <option value='Brandi Justice'>Brandi Justice</option>
+                    <option value='Bryan Teat'>Bryan Teat</option>
+                </select>
+            </div>
+        </div>
+    <hr>
+    <div class="d-flex justify-content-center"><h5>Types of Occurrences</h5></div>
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selIntake" class="small">Order Entry</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selIntake" name="selIntake">
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'ORDIN' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selMed" class="small">Medication</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selMed" name="selMed" >
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'MED' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selShipping" class="small">Shipping</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selShipping" name="selShipping">
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'SHIP' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selDelivery" class="small">Delivery</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selDelivery" name="selDelivery" >
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'DEL' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selBilling" class="small">Billing</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selBilling" name="selBilling">
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'BILL' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selCooking" class="small">Cooking</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selCooking" name="selCooking" >
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'COOK' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+    </div>
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selOther" class="small">Other\Uncategorized</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther">
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'OU' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+        </div>
+    </div>
+
+
+    <div class="form-group row ">
+        <div class="col-sm-5">
+            <label for="selTechInv" class="small">Tech Invovled</label>
+            <select type="text"  class="form-control form-control-sm" id="selTechInv" name="selTechInv">
+                <option value="0"></option>
+                {%- for u in users -%}
+                    {% if 'Pharm Tech' in u['position'] -%}
+                        <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
+                    {% endif %}
+                {%- endfor -%}
+
+            </select>
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-sm-5">
+            <label for="selRphInv" class="small">RPH Invovled</label>
+            <select type="text"  class="form-control form-control-sm" id="selRphInv" name="selRphInv" >
+                <option value="0"></option>
+                {%- for u in users %}
+                    {% if 'RPH' in u['position'] -%}
+                        <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center  mb-3">
+        <div class="form-group row">
+            <label for="txtExp">Explanation</label>
+            <textarea class="form-control" rows="6" cols=60" id="txtExp" name="txtExp" sy></textarea>
+            <p syt></p>
+        </div> 
+    </div>
+    <div class="d-flex justify-content-around  mb-3">
+            <div class="p-2 bg-info"><button type="button" onclick="validateForm()"  class="btn btn-primary rounded">Submit</button></div>
+            <div class="p-2 bg-info"><button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button></div>
+            <input type="hidden" id="opcode" name="opcode" value="insert"/>
+            <input type="hidden" id="txtID" name="txtID" value="0"/>
+    </div>
+
+    </form>
+    </div>
+    <!-- Error Modal -->
+    <div class="modal" id="mError">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Errors Found</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+            <p class="float-left" id="errMsg" style="font-weight: bold; color:red"></p>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Info Modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="mInfo">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tmInfo"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="pmInfo"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Search Modal -->
+        <div class="modal" id="mSearch">
+            <div class="modal-dialog  modal-lg">
+                <div class="modal-content">
+    
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title" id="hSearch"><strong>Search Reported Occurences</strong></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+    
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <form id="frmSearch" name="frmSearch">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="optDate" id="rbStart" checked value="DISCOVER_DATE"> Discovered
+                                    </label>
+                                    &nbsp; | &nbsp;
+                                    <label class="radio-inline">
+                                        <input type="radio" name="optDate" id="rbEnd" value="OCCUR_DATE"> Occurred
+                                    </label>
+                                </div>
+                                <div class="col-sm-7">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-3">
+                                    <label for="txtDateStart" class="col-form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="txtDateStart" name="txtDateStart">
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="txtDateEnd" class="col-form-label">End Date</label>
+                                    <input type="date" class="form-control" id="txtDateEnd" name="txtDateEnd">
+                                </div>
+                                <div class="col-sm-2">
+                                    <label for="selFacSearch" class="col-form-label">By Facility</label>
+                                    <select type="text" class="form-control" id="selFacSearch" name="selFacSearch" onchange="get_fac_name_s()">
+                                        <option value="0"></option>
+                                        {% for f in facilities %}
+                                            <option value="{{ f.name }}">{{ f.code }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label for="txtFacSearch" class="col-form-label">&nbsp;</label>
+                                    <input type="text" class="form-control" readonly style="background-color: #fdfdff" id="txtFacSearch" name="txtFacSearch">
+                                </div>
+                            </div>
+                    <p class="float-left" id="errMsgSearch" style="font-weight: bold; color:red"></p>
+                    <table class="table table-striped" id="tblSearch">
+                        <thead class="">
+                            <tr class="table-primary">
+                                <th scope="col">Discovered</th>
+                                <th scope="col">Occurred</th>
+                                <th scope="col">Facility</th>
+                                <th scope="col">Created By</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbSearch">
+                        </tbody>
+                    </table>
+                </form>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary mr-auto" onclick="search()" >Search</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+    
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+    function get_fac_name() {
+        let fac = $("#selFac option:selected" ).val();
+        $("#txtFac").val(fac);
+    }
+
+    function get_fac_name_s() {
+        let fac = $("#selFacSearch option:selected" ).val();
+        $("#txtFacSearch").val(fac);
+    }
+
+    function validateForm() {
+        let dateReport = $('#dateReport').val();
+        let dateOccur = $('#dateOccur').val();
+        let selFac = $("#selFac option:selected" ).text().trim();
+        let txtPatient = $('#txtPatient').val().trim();
+        let txtPerRept = $('#txtPerRept').val();
+        let txtPhone = $('#txtPhone').val();
+        let selPerComp= $('#selPerComp').val();
+        let selIntake = $('#selIntake').val();
+        let selMed = $('#selMed').val();
+        let selShipping = $('#selShipping').val();
+        let selDelivery = $('#selDelivery').val();
+        let selBilling= $('#selBilling').val();
+        let selCooking = $('#selCooking').val();
+        let selOther = $('#selOther').val();
+        let selTechInv = $('#selTechInv').val();
+        let selRphInv = $('#selRphInv').val();
+        let txtExp = $('#txtExp').val();
+        let opcode =  $('#opcode').val();
+        let id = "0";
+
+        let msg = "";
+        let type_count = 0;
+        console.log(txtPatient);
+
+        if(dateReport.trim() === "") {
+            msg += "A date for discovery or reporting is required<br />";
+        }
+        if(dateOccur.trim() === "") {
+            msg += "An occurence date is required<br />";
+        }
+        if(selFac.trim() === "0") {
+            msg += "A Facility code is required<br />";
+        }
+
+        $('.selType').each(function(index, item){
+            if ($(this).val() !== "0") {
+                type_count += 1;
+            }
+        });
+
+        if (type_count === 0){
+            msg += "At least one reason from the 'Types of Occurences' is required<br />";
+        }
+
+        if(txtExp.trim() === "") {
+            msg += "A explanation of the occurence is required<br />";
+        }
+
+        
+        if (msg !== "") {
+            $('#errMsg').html(msg);
+            $('#mError').modal('show');
+            return false;    
+        }
+        else {
+            if (opcode === 'update'){
+                id = $("#txtID").val();
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "{{url_for('occur')}}",
+                dataType: 'json',
+                data: {
+                    'dateReport': dateReport,
+                    'dateOccur': dateOccur,
+                    'selFac': selFac,
+                    'txtPatient': txtPatient,
+                    'txtPerRept': txtPerRept,
+                    'txtPhone': txtPhone,
+                    'selPerComp': selPerComp,
+                    'selIntake': selIntake,
+                    'selMed': selMed,
+                    'selShipping': selShipping,
+                    'selDelivery': selDelivery,
+                    'selBilling': selBilling,
+                    'selCooking': selCooking,
+                    'selOther': selOther,
+                    'selTechInv': selTechInv,
+                    'selRphInv': selRphInv,
+                    'txtExp': txtExp,
+                    'op-code': opcode,
+                    'id': id
+                },
+                async: false,
+                success: function (data) {
+                },
+                complete: function (data) {
+                    if (opcode === 'update'){
+                        $('#tmInfo').html("Update Complete");
+                        $('#pmInfo').html("Update completed for Occurence with ID: " + id )
+                        $('#mInfo').modal('show');
+                    }
+                    else if (opcode === 'insert'){
+                        $('#tmInfo').html("Record Added");
+                        $('#pmInfo').html("An Occurence reported on date '" +  dateReport + "' has been added")
+                        $('#mInfo').modal('show');
+                        clearForm();
+                    }
+                    //location.reload();
+                }
+            });
+        }
+
+
+    }
+
+    function search() {
+        $('#errMsgSearch').html("");
+        let facility = $("#selFacSearch option:selected" ).text().trim();
+        let startDate = $('#txtDateStart').val().trim();
+        let endDate = $('#txtDateEnd').val().trim();
+        let dateType = $("input[name='optDate']:checked").val().trim();
+        let dates = "", filter = "", facSearch = "", where = " WHERE ";
+        let html = '';
+
+        if (facility === "" && startDate === '' && endDate === '') {
+            $('#errMsgSearch').html("A search term must be entered");
+            return false;
+        }
+        
+        if (!compareDates(startDate, endDate) && (startDate !== '' && endDate !== '')) {
+            $('#errMsgSearch').html("The starting date cannot be later than the ending date");
+            return false;
+        }
+
+        if (startDate !== '' && endDate  === ""){
+            dates =  dateType + " = '" + startDate + "'"
+        }
+        else if ( startDate !== '' && endDate  !== ""){
+            dates = " ( " + dateType + " >= '" + startDate + "' AND " + dateType + " <= '" + endDate + "' ) " 
+        }
+
+        if (facility != '') {
+            facSearch = "FACILITY_CODE = '" + facility + "'"
+        }
+
+        if (facility != '' && (startDate === '' && endDate === '')) {
+            filter = where + facSearch;
+        }
+        else if(facility != '') {
+            filter = where + facSearch + " AND " + dates;
+        }
+        else {
+            filter = where  + dates;
+        }
+
+        $.ajax({
+            data: {
+                sql: `SELECT ID
+                    ,CONVERT(char(10)
+                    ,DISCOVER_DATE,126) as DISCOVER_DATE
+                    ,CONVERT(char(10), OCCUR_DATE,126) as OCCUR_DATE
+                    ,FACILITY_CODE, CREATED_BY
+                    ,USERNAME
+                    FROM dbo.RPT_OCCUR 
+                `+ filter
+            },
+            type: 'POST',
+            url: '/getSearch',
+            dataType: 'json'
+        })
+        .done(function (data) {
+            $.each(data, function (index, item) {
+                let id = item.ID
+                let dateDiscover = item.DISCOVER_DATE;
+                let dateOccur = item.OCCUR_DATE;
+                let facCode = item.FACILITY_CODE;
+                let createdBy = item.USERNAME;
+                let facName = $("#txtFacSearch").val();
+                html += '<tr><td>' + dateDiscover + '</td>';
+                html += '<td>' + dateOccur + '</td>';
+                html += '<td>' + facCode + '</td>';
+                html += '<td>' + createdBy + '</td>';
+                html += `<td><a id="edit-user" href="#" onclick="edit_occurence(` + id + `,'` + facName +  `')" >Edit</a></td></tr>`;
+                
+            });
+            $("#tbSearch").html(html);
+        });
+        console.log(filter);
+        // console.log(dateType);
+    }
+
+    function edit_occurence(id, facName){
+        $.ajax({
+            data: {
+                sql: `SELECT ID
+                    ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
+                    ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
+                    ,[USERNAME]
+                    ,[FACILITY_CODE]
+                    ,[CREATED_BY]
+                    ,[USERNAME]
+                    ,[FACILITY_CODE]
+                    ,[PATIENT_NAME]
+                    ,[PERSON_REPORTING]
+                    ,[PHONE]
+                    ,[PERSON_COMPLETING]
+                    ,[ORDER_INTAKE]
+                    ,[MEDICATION]
+                    ,[SHIPPING]
+                    ,[DELIVERY]
+                    ,[BILLING]
+                    ,[COOKING]
+                    ,[OTHER]
+                    ,[TECH_ID]
+                    ,[RPH_ID]
+                    ,[EXPLANATION]
+                    FROM dbo.[RPT_OCCUR] WHERE [ID] = `+ id
+            },
+            type: 'POST',
+            url: '/getSearch',
+            dataType: 'json'
+        })
+        .done(function (data) {
+            $.each(data, function (index, item) {
+                $('#dateReport').val(item.DISCOVER_DATE);
+                $('#dateOccur').val(item.OCCUR_DATE);
+                //$("#selFac option:selected").text(item.FACILITY_CODE);
+                $("#selFac").val(facName);
+                $("#txtFac").val(facName);
+                $('#txtPatient').val(item.PATIENT_NAME);
+                $('#txtPerRept').val(item.PERSON_REPORTING);
+                $('#txtPhone').val(item.PHONE);
+                $('#selPerComp').val(item.PERSON_COMPLETING);
+                $('#selIntake').val(item.ORDER_INTAKE); 
+                $('#selMed').val(item.MEDICATION);
+                $('#selShipping').val(item.SHIPPING);
+                $('#selDelivery').val(item.DELIVERY);
+                $('#selBilling').val(item.BILLING);
+                $('#selCooking').val(item.COOKING);
+                $('#selOther').val(item.OTHER);
+                $('#selTechInv').val(item.TECH_ID);
+                $('#selRphInv').val(item.RPH_ID);
+                $('#txtExp').val(item.EXPLANATION);
+                $('#opcode').val('update');
+                $('#dMode').html("Update Mode");
+                $("#txtID").val(item.ID);
+            });
+        });
+        $('#mSearch').modal('hide');
+    }
+
+    function compareDates(start, end){
+        try {
+            let dStart = Date.parse(start);
+            let dEnd = Date.parse(end);
+            console.log(start);
+
+            if (dStart > dEnd) {
+                return false
+            }
+            return true;
+        }
+        catch(err){
+            alert(err.message)
+            return false;
+        }
+    }
+
+    function openSearch() {
+        $('#mSearch').modal('show');
+        $('#rbStart').prop("checked", true);;
+        $('#txtDateStart').val("");
+        $('#txtDateEnd').val("");
+        $('#txtFacSearch').val("");
+        $('#selFacSearch').val("0");
+        $("#tbSearch").html("");
+        $('#errMsgSearch').html("");
+    }
+
+    function clearForm() {
+        $('#dateReport').val("");
+        $('#dateOccur').val("");
+        $("#selFac" ).val("0")
+        $("#txtFac" ).val("")
+        $('#txtPatient').val("")
+        $('#txtPerRept').val("");
+        $('#txtPhone').val("");
+        $('#selPerComp').val("0");
+        $('#selIntake').val("0");
+        $('#selMed').val("0");
+        $('#selShipping').val("0");
+        $('#selDelivery').val("0");
+        $('#selBilling').val("0");
+        $('#selCooking').val("0");
+        $('#selOther').val("0");
+        $('#selTechInv').val("0");
+        $('#selRphInv').val("0");
+        $('#txtExp').val("");
+        $("#txtID").val("0");
+        $("#dMode").html("Add Mode");
+        $('#opcode').val("insert");
+    }
+
+        </script>
+        
+   {% endblock %}
+    
