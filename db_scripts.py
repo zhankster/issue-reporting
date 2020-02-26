@@ -170,7 +170,7 @@ get_facilities = """ SELECT
         [ID]
         ,[DCODE]
         ,[DNAME]
-    FROM [dbo].[_FAC]
+    FROM [dbo].[FAC]
     ORDER BY [DCODE]
 """
 

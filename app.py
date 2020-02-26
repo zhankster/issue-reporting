@@ -60,7 +60,7 @@ def occur():
                 request.form['txtPatient'], 
                 request.form['txtPerRept'], 
                 request.form['txtPhone'], 
-                request.form['selPerComp'], 
+                int(request.form['selPerComp']), 
                 int(request.form['selIntake']), 
                 int(request.form['selMed']), 
                 int(request.form['selShipping']), 
@@ -88,7 +88,7 @@ def occur():
             request.form['txtPatient'], 
             request.form['txtPerRept'], 
             request.form['txtPhone'], 
-            request.form['selPerComp'], 
+            int(request.form['selPerComp']), 
             int(request.form['selIntake']), 
             int(request.form['selMed']), 
             int(request.form['selShipping']), 
@@ -151,15 +151,31 @@ def occur():
         d['name'] = row.DNAME
         facility_list.append(d)
         
-    return render_template('occur.html', page_title = page_title, users=user_list, reasons=reason_list, facilities=facility_list)
+    return render_template('occur.html', page_title = page_title, users=user_list, current_id=session['userid'],
+                        reasons=reason_list, facilities=facility_list)
 
 @app.route('/getSearch', methods=['POST'])
 def getSearch():
-        sql = request.form['sql']
-        items = dbs.get_json(sql)        
-        items = jsonify(items)
+    sql = request.form['sql']
+    items = dbs.get_json(sql)        
+    items = jsonify(items)
 
-        return items
+    return items
+    
+@app.route('/updateStatus', methods=['POST'])
+def updateStatus():
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    sql = request.form['sql']
+    rpt_id = request.form['id']
+    status = request.form['status']
+    # msg = 'Report Voided' if '0' else 'Report Set Valid'
+    msg = "Status"
+    
+    cur.execute(sql)
+    conn.commit()
+
+    return msg
 
 @app.route('/login', methods=["GET", "POST"])
 def login():

@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block body %}
-</style>
+
 <script type="text/javascript">
 	var nav = document.getElementById("navOccur");
 	nav.className += " active";
     nav.style.fontWeight = "bold";
 </script>
+        <input id="current_id" type="hidden" value="{{ current_id}}" />
+        <input id="current_status" type="hidden" value="{{ current_status}}" />
         <form class="main-form">
         <div class="d-flex justify-content-between row">
             <div class="col-sm-2">
@@ -24,17 +26,20 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="dateReport" class="small">Date Discovered or Reported to IHS </label>
-                    <input type="date" class="form-control form-control-sm" id="dateReport" name="dateReport" placeholder="Report Date">
+                    <input type="date" class="form-control form-control-sm" id="dateReport" name="dateReport" placeholder="Report Date" /> 
                 </div>
-            </div>
-            <div class="col-md-4">
-                &nbsp;     
             </div>
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="dateOccur" class="small">Date of Occurrence </label>
-                    <input type="date" class="form-control form-control-sm" id="dateOccur" name="dateOccur" placeholder="Occurrence Date">
+                    <input type="date" class="form-control form-control-sm" id="dateOccur" name="dateOccur" placeholder="Occurrence Date" />
                 </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="dateCreate" class="small">Report Creation Date </label>
+                    <input type="date" readonly class="form-control form-control-sm"  id="dateCreate" name="dateCreate" placeholder="Date Created" />
+                </div>    
             </div>
         </div>
         <div class="form-group row">
@@ -68,18 +73,17 @@
             <div class="col-sm-5">
                 <label for="selPerComp" class="small">Person completing occurrence report</label>
                 <select type="text"  class="form-control form-control-sm" id="selPerComp" name="selPerComp">
-                    <option value='0'></option>
-                    <option value='Andi Givens'>Andi Givens</option>
-                    <option value='Ashely Ingram'>Ashely Ingram</option>
-                    <option value='Brandi Justice'>Brandi Justice</option>
-                    <option value='Bryan Teat'>Bryan Teat</option>
+                <option value="0"></option>
+                {%- for u in users %}
+                        <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
+                {%- endfor -%}
                 </select>
             </div>
         </div>
     <hr>
     <div class="d-flex justify-content-center"><h5>Types of Occurrences</h5></div>
     <div class="form-group row ">
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selIntake" class="small">Order Entry</label>
             <select type="text"  class="form-control form-control-sm selType" id="selIntake" name="selIntake">
                 <option value="0"></option>
@@ -90,10 +94,7 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-md-2">
-            &nbsp;
-        </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selMed" class="small">Medication</label>
             <select type="text"  class="form-control form-control-sm selType" id="selMed" name="selMed" >
                 <option value="0"></option>
@@ -104,10 +105,7 @@
                 {%- endfor -%}
             </select>
         </div>
-    </div>
-
-    <div class="form-group row ">
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selShipping" class="small">Shipping</label>
             <select type="text"  class="form-control form-control-sm selType" id="selShipping" name="selShipping">
                 <option value="0"></option>
@@ -118,10 +116,10 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-md-2">
-            &nbsp;
-        </div>
-        <div class="col-sm-5">
+    </div>
+
+    <div class="form-group row ">
+        <div class="col-sm-4">
             <label for="selDelivery" class="small">Delivery</label>
             <select type="text"  class="form-control form-control-sm selType" id="selDelivery" name="selDelivery" >
                 <option value="0"></option>
@@ -132,10 +130,7 @@
                 {%- endfor -%}
             </select>
         </div>
-    </div>
-
-    <div class="form-group row ">
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selBilling" class="small">Billing</label>
             <select type="text"  class="form-control form-control-sm selType" id="selBilling" name="selBilling">
                 <option value="0"></option>
@@ -146,10 +141,7 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-md-2">
-            &nbsp;
-        </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selCooking" class="small">Cooking</label>
             <select type="text"  class="form-control form-control-sm selType" id="selCooking" name="selCooking" >
                 <option value="0"></option>
@@ -162,7 +154,7 @@
         </div>
     </div>
     <div class="form-group row ">
-        <div class="col-sm-5">
+        <div class="col-sm-4">
             <label for="selOther" class="small">Other\Uncategorized</label>
             <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther">
                 <option value="0"></option>
@@ -173,10 +165,10 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             &nbsp;
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
         </div>
     </div>
 
@@ -211,14 +203,15 @@
     </div>
     <div class="d-flex justify-content-center  mb-3">
         <div class="form-group row">
-            <label for="txtExp">Explanation</label>
-            <textarea class="form-control" rows="6" cols=60" id="txtExp" name="txtExp" sy></textarea>
+            <label for="txtExp" class="medium">Explanation</label>
+            <textarea class="form-control" rows="6" cols=80" id="txtExp" name="txtExp" sy></textarea>
             <p syt></p>
         </div> 
     </div>
     <div class="d-flex justify-content-around  mb-3">
-            <div class="p-2 bg-info"><button type="button" onclick="validateForm()"  class="btn btn-primary rounded">Submit</button></div>
-            <div class="p-2 bg-info"><button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button></div>
+            <div class="p-1 bg-info"><button type="button" onclick="validateForm()"  class="btn btn-primary rounded">Submit</button></div>
+            <div class="p-1 bg-info"><button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button></div>
+            <div class="p-1 bg-info" id="dVoid" style="display:none"><button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-danger rounded">Void Current</button></div>
             <input type="hidden" id="opcode" name="opcode" value="insert"/>
             <input type="hidden" id="txtID" name="txtID" value="0"/>
     </div>
@@ -284,13 +277,17 @@
                     <form id="frmSearch" name="frmSearch">
                         <div class="form-group">
                             <div class="row">
-                                <div class="col-sm-5">
+                                <div class="col-sm-8">
                                     <label class="radio-inline">
                                         <input type="radio" name="optDate" id="rbStart" checked value="DISCOVER_DATE"> Discovered
                                     </label>
                                     &nbsp; | &nbsp;
                                     <label class="radio-inline">
                                         <input type="radio" name="optDate" id="rbEnd" value="OCCUR_DATE"> Occurred
+                                    </label>
+                                    &nbsp; | &nbsp;
+                                    <label class="radio-inline">
+                                        <input type="radio" name="optDate" id="rbCreated" value="CREATED_AT"> Created
                                     </label>
                                 </div>
                                 <div class="col-sm-7">
@@ -325,8 +322,10 @@
                             <tr class="table-primary">
                                 <th scope="col">Discovered</th>
                                 <th scope="col">Occurred</th>
+                                <th scope="col">Created</th>
                                 <th scope="col">Facility</th>
                                 <th scope="col">Created By</th>
+                                <th scope="col">Valid</th>
                                 <th scope="col"></th>
                             </tr>
                         </thead>
@@ -344,7 +343,11 @@
             </div>
         </div>
 
-        <script type="text/javascript">
+<script type="text/javascript">
+    $(function(){
+        $("#selPerComp").val($("#current_id").val());
+    });
+
     function get_fac_name() {
         let fac = $("#selFac option:selected" ).val();
         $("#txtFac").val(fac);
@@ -506,11 +509,12 @@
         $.ajax({
             data: {
                 sql: `SELECT ID
-                    ,CONVERT(char(10)
-                    ,DISCOVER_DATE,126) as DISCOVER_DATE
+                    ,CONVERT(char(10),DISCOVER_DATE,126) as DISCOVER_DATE
                     ,CONVERT(char(10), OCCUR_DATE,126) as OCCUR_DATE
+                    ,CONVERT(char(10), CREATED_AT,126) as CREATED_AT
                     ,FACILITY_CODE, CREATED_BY
                     ,USERNAME
+                    ,VALID
                     FROM dbo.RPT_OCCUR 
                 `+ filter
             },
@@ -523,13 +527,17 @@
                 let id = item.ID
                 let dateDiscover = item.DISCOVER_DATE;
                 let dateOccur = item.OCCUR_DATE;
+                let dateCreate = item.CREATED_AT;
                 let facCode = item.FACILITY_CODE;
                 let createdBy = item.USERNAME;
                 let facName = $("#txtFacSearch").val();
+                let valid = item.VALID;
                 html += '<tr><td>' + dateDiscover + '</td>';
                 html += '<td>' + dateOccur + '</td>';
+                html += '<td>' + dateCreate + '</td>';
                 html += '<td>' + facCode + '</td>';
                 html += '<td>' + createdBy + '</td>';
+                html += '<td>' + valid + '</td>';
                 html += `<td><a id="edit-user" href="#" onclick="edit_occurence(` + id + `,'` + facName +  `')" >Edit</a></td></tr>`;
                 
             });
@@ -540,9 +548,10 @@
     }
 
     function edit_occurence(id, facName){
+        let cls = 'fActive';
         $.ajax({
             data: {
-                sql: `SELECT ID
+                sql: `SELECT r.ID
                     ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
                     ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
                     ,[USERNAME]
@@ -550,6 +559,7 @@
                     ,[CREATED_BY]
                     ,[USERNAME]
                     ,[FACILITY_CODE]
+                    ,f.[DNAME] as [FAC_NAME]
                     ,[PATIENT_NAME]
                     ,[PERSON_REPORTING]
                     ,[PHONE]
@@ -564,7 +574,12 @@
                     ,[TECH_ID]
                     ,[RPH_ID]
                     ,[EXPLANATION]
-                    FROM dbo.[RPT_OCCUR] WHERE [ID] = `+ id
+                    ,[VALID]
+                    ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
+                    FROM dbo.[RPT_OCCUR] r
+                    LEFT JOIN CIPS.dbo.[FAC] f
+                    ON r.[FACILITY_CODE] = f.DCODE
+                    WHERE r.[ID] = `+ id
             },
             type: 'POST',
             url: '/getSearch',
@@ -574,9 +589,9 @@
             $.each(data, function (index, item) {
                 $('#dateReport').val(item.DISCOVER_DATE);
                 $('#dateOccur').val(item.OCCUR_DATE);
-                //$("#selFac option:selected").text(item.FACILITY_CODE);
-                $("#selFac").val(facName);
-                $("#txtFac").val(facName);
+                $('#dateCreate').val(item.CREATED_AT);
+                $("#selFac").val(item.FAC_NAME);
+                $("#txtFac").val(item.FAC_NAME);
                 $('#txtPatient').val(item.PATIENT_NAME);
                 $('#txtPerRept').val(item.PERSON_REPORTING);
                 $('#txtPhone').val(item.PHONE);
@@ -594,9 +609,20 @@
                 $('#opcode').val('update');
                 $('#dMode').html("Update Mode");
                 $("#txtID").val(item.ID);
+                $("#current_status").val(item.VALID);
+                if (item.VALID == 0) {
+                    $('.container').addClass(cls);
+                    $("#btnVoid").text("Set Active");
+                }
+                else{
+                    $('.container').removeClass(cls);
+                    $("#btnVoid").text("Void Current");
+                }
+
             });
         });
         $('#mSearch').modal('hide');
+        $("#dVoid").show();
     }
 
     function compareDates(start, end){
@@ -623,13 +649,15 @@
         $('#txtDateEnd').val("");
         $('#txtFacSearch').val("");
         $('#selFacSearch').val("0");
-        $("#tbSearch").html("");
+        //$("#tbSearch").html("");
         $('#errMsgSearch').html("");
     }
 
     function clearForm() {
+        let cls = 'fActive';
         $('#dateReport').val("");
         $('#dateOccur').val("");
+        $('#dateCreate').val("1900-01-01");
         $("#selFac" ).val("0")
         $("#txtFac" ).val("")
         $('#txtPatient').val("")
@@ -649,9 +677,48 @@
         $("#txtID").val("0");
         $("#dMode").html("Add Mode");
         $('#opcode').val("insert");
+        $("#dVoid").hide();
+        $('.container').removeClass(cls);
+        $("#btnVoid").text("Void Current");
     }
 
-        </script>
+    function voidForm() {
+        let id = $("#txtID").val();
+        var current_stat = $("#current_status").val().trim();
+        var status = '1';
+        msg_stat = 'set active'
+        if (current_stat === '1') {
+            status = '0';
+            msg_stat = 'voided'
+        }
+
+        let sql =`UPDATE dbo.RPT_OCCUR SET VALID = ` + status + ` WHERE ID = ` + id;
+
+        $.ajax({
+            type: "POST",
+            url: "{{url_for('updateStatus')}}",
+            dataType: 'json',
+            data: {
+                'sql': sql,
+                'id':id,
+                'status': status
+            },
+            async: false,
+            success: function (data) {
+            },
+            complete: function (data) {
+                $('#tmInfo').html("Status change");
+                $('#pmInfo').html("An Occurence with ID '" +  id + "' has been " + msg_stat);
+                $('#mInfo').modal('show');
+                clearForm();
+            }
+            
+        });
+
+    }
+
+
+</script>
         
-   {% endblock %}
+{% endblock %}
     

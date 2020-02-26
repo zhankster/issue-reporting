@@ -2,8 +2,17 @@
     margin-top: .5em;
 }
 
-label.sm {
-    font-size: 1em;
+label.small {
+    font-size: .75em;
+    font-weight: 700;
+}
+
+label.medium {
+    font-weight: 700;
+}
+
+h5{
+    font-weight: 700; 
 }
 
 ::placeholder {
@@ -34,21 +43,10 @@ label.sm {
     text-align: center;
 }
 
-/* ::-webkit-input-placeholder {
+:read-only {
+    background-color: #fdfdff;
+} 
 
-    color: rgba(247, 244, 250, 0.87);
+.fActive {
+    background-color: #df0c0c;
 }
-
-::-moz-placeholder {
-
-    color: rgba(247, 244, 250, 0.87);
-}
-
-:-ms-input-placeholder {
-
-    color: rgba(247, 244, 250, 0.87);
-}
-
-:-moz-placeholder {
-    color: rgba(247, 244, 250, 0.87);
-} */

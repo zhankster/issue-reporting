@@ -32,7 +32,7 @@
                         <th scope="col">Last Name</th>
                         <th scope="col">Position</th>
 						<th scope="col">Initials</th>
-						<th scope="col"></th>
+						<th scope="col">Active</th>
 						<th scope="col"></th>
 					</tr>
 				</thead>
@@ -41,9 +41,8 @@
 					<tr>
 						<th scope="row">
 							{{ u['username'] }}
-							<input type="hidden" id="{{ u['id'] }}_username" name="{{ u['id'] }}_username" value="{{ u['username'] }}"/>
-							<input type="hidden" id="{{ u['id'] }}_password" name="{{ u['id'] }}_password" value="{{ u['password'] }}"/>
-							<input type="hidden" id="{{ u['id'] }}_active" name="{{ u['id'] }}_active" value="{{ u['active'] }}"/>					
+							<input type="hidden" id="{{ u['id'] }}_username" name="{{ u['id'] }}_username" value="{{ u['username'] }}"/>							<input type="hidden" id="{{ u['id'] }}_password" name="{{ u['id'] }}_password" value="{{ u['password'] }}"/>
+											
                         </th>
                         <th scope="row">
 							{{ u['firstname'] }}
@@ -62,10 +61,11 @@
 							{{ u['initials'] }}
 							<input type="hidden" id="{{ u['id'] }}_initials" name="'{{ u['id'] }}_initials'" value="{{ u['initials'] }}"/>
 						</th>
-						<td>
-							<a id='edit-user' href="#" onclick="edit_user('{{u['id']}}')">Edit</a>
-						</td>
-						<td><a id='delete-user' href="#" onclick="delete_user('{{u['id']}}', '{{u['username']}}')">Delete</a></td>
+						<th scope="row">
+							{{ u['active'] }}
+							<input type="hidden" id="{{ u['id'] }}_active" name="{{ u['id'] }}_active" value="{{ u['active'] }}"/>	
+						</th>
+						<td><a id='edit-user' href="#" onclick="edit_user('{{u['id']}}')">Edit</a></td>
 					</tr>
 					{% endfor %}
 				</tbody>
@@ -293,7 +293,7 @@ function validateForm(){
 		return false;
 	}
 	else {
-		if (opcode === 'edit') {
+		if (opcode === 'update') {
 			if ($(this).prop("#active") == true) {
 				active = 1
 			}
