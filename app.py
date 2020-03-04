@@ -69,7 +69,8 @@ def occur():
                 int(request.form['selCooking']), 
                 int(request.form['selOther']), 
                 int(request.form['selTechInv']), 
-                int(request.form['selRphInv']), 
+                int(request.form['selRphInv']), #currentRCode
+                int(request.form['currentRCode']),
                 request.form['txtExp'],
                 session['initials']))
             # print(params)
@@ -98,6 +99,7 @@ def occur():
             int(request.form['selOther']), 
             int(request.form['selTechInv']), 
             int(request.form['selRphInv']), 
+            int(request.form['currentRCode']),
             request.form['txtExp'],
             session['initials'],
             int(request.form['id']) ))

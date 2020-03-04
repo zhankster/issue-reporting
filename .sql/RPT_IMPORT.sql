@@ -1,0 +1,38 @@
+USE [RXBackend]
+GO
+
+/****** Object:  Table [dbo].[RPT_OCCUR]    Script Date: 2/27/2020 8:17:10 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[RPT_IMPORT](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[DISCOVER_DATE] [datetime] NULL,
+	[OCCUR_DATE] [datetime] NULL,
+	[USERNAME] [varchar](50) NULL,
+	[FACILITY_CODE] [nchar](6) NULL,
+	[PATIENT_NAME] [varchar](50) NULL,
+	[PERSON_REPORTING] [varchar](50) NULL,
+	[PHONE] [varchar](20) NULL,
+	[PERSON_COMPLETING] [int] NULL,
+	[ORDER_INTAKE] [varchar](120) NULL,
+	[MEDICATION] [varchar](120) NULL,
+	[SHIPPING] [varchar](120) NULL,
+	[DELIVERY] [varchar](120) NULL,
+	[BILLING] [varchar](120) NULL,
+	[COOKING] [varchar](120) NULL,
+	[OTHER] [varchar](120) NULL,
+	[EXPLANATION] [varchar](3000) NULL,
+	[TECH_ID] [int] NULL,
+	[RPH_ID] [int] NULL,
+ CONSTRAINT [PK_RPT_IMPORT] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+
+

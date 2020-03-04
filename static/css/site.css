@@ -43,9 +43,9 @@ h5{
     text-align: center;
 }
 
-:read-only {
+/* :read-only {
     background-color: #fdfdff;
-} 
+}  */
 
 .fActive {
     background-color: #df0c0c;

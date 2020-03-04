@@ -35,10 +35,16 @@
                     <input type="date" class="form-control form-control-sm" id="dateOccur" name="dateOccur" placeholder="Occurrence Date" />
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="dateCreate" class="small">Report Creation Date </label>
                     <input type="date" readonly class="form-control form-control-sm"  id="dateCreate" name="dateCreate" placeholder="Date Created" />
+                </div>    
+            </div>
+            <div class="col-md-1">
+                <div class="form-group">
+                    <label for="frmID" class="small">ID</label>
+                    <input type="text" readonly class="form-control form-control-sm"  id="frmID" name="frmID"  />
                 </div>    
             </div>
         </div>
@@ -154,9 +160,12 @@
         </div>
     </div>
     <div class="form-group row ">
+
+
+
         <div class="col-sm-4">
             <label for="selOther" class="small">Other\Uncategorized</label>
-            <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther">
+            <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther" >
                 <option value="0"></option>
                 {%- for r in reasons -%}
                     {% if 'OU' in r['code'] -%}
@@ -201,19 +210,26 @@
             </select>
         </div>
     </div>
-    <div class="d-flex justify-content-center  mb-3">
-        <div class="form-group row">
-            <label for="txtExp" class="medium">Explanation</label>
-            <textarea class="form-control" rows="6" cols=80" id="txtExp" name="txtExp" sy></textarea>
-            <p syt></p>
-        </div> 
-    </div>
-    <div class="d-flex justify-content-around  mb-3">
-            <div class="p-1 bg-info"><button type="button" onclick="validateForm()"  class="btn btn-primary rounded">Submit</button></div>
-            <div class="p-1 bg-info"><button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button></div>
-            <div class="p-1 bg-info" id="dVoid" style="display:none"><button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-danger rounded">Void Current</button></div>
-            <input type="hidden" id="opcode" name="opcode" value="insert"/>
-            <input type="hidden" id="txtID" name="txtID" value="0"/>
+    <div class="form-group row">
+        <div class="col-md-3" >
+            <br /> 
+            <div class='float-right'>
+                <button type="button" class="btn btn-secondary rounded btn-sm btn-form" onclick="clearForm()">Clear Form</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button type="button" onclick="validateForm()"  class="btn btn-primary btn-sm rounded btn-form">Submit</button>
+                &nbsp;
+            </div>
+            <br /><br />
+            <div class="float-right" id="dVoid" style="display:none"><button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-warning rounded btn-sm btn-form">Void Current</button>&nbsp;
+            </div>
+                <input type="hidden" id="opcode" name="opcode" value="insert"/>
+                <input type="hidden" id="txtID" name="txtID" value="0"/>
+        </div>
+        <div class="col-md-9">
+                <label for="txtExp" class="medium">Explanation</label>
+                <textarea class="form-control" rows="6" cols=80" id="txtExp" name="txtExp" ></textarea>
+                <br />
+        </div>
     </div>
 
     </form>
@@ -287,7 +303,7 @@
                                     </label>
                                     &nbsp; | &nbsp;
                                     <label class="radio-inline">
-                                        <input type="radio" name="optDate" id="rbCreated" value="CREATED_AT"> Created
+                                        <input type="radio" name="optDate" id="rbCreated" value="CAST(CREATED_AT AS DATE)"> Created
                                     </label>
                                 </div>
                                 <div class="col-sm-7">
@@ -325,6 +341,7 @@
                                 <th scope="col">Created</th>
                                 <th scope="col">Facility</th>
                                 <th scope="col">Created By</th>
+                                <th scope="col">ID</th>
                                 <th scope="col">Valid</th>
                                 <th scope="col"></th>
                             </tr>
@@ -344,8 +361,30 @@
         </div>
 
 <script type="text/javascript">
+    var categorySelected = false;
+    let currentRCode = "0";
+
     $(function(){
+        $('#dateCreate').val(currentDate());
+        $('#frmID').val("New");
+
         $("#selPerComp").val($("#current_id").val());
+
+        $(".selType").change(function(){
+            if ($(this).val() !== "0") {
+                categorySelected = true;
+                $('.selType').attr('disabled',true);
+                $(this).attr('disabled',false);
+                currentRCode = $(this).val();
+                console.log(currentRCode);
+            }
+            else {
+                categorySelected = false;
+                currentRCode = "0";
+                $('.selType').attr('disabled',false);
+            }
+        });
+
     });
 
     function get_fac_name() {
@@ -396,8 +435,17 @@
         $('.selType').each(function(index, item){
             if ($(this).val() !== "0") {
                 type_count += 1;
+                //console.log("No Value selected");
+            }
+            else{
+                type_count -= 1;
             }
         });
+
+        
+        if (!categorySelected){
+            msg += "At least one reason from the 'Types of Occurences' is required<br />";
+        }
 
         if (type_count === 0){
             msg += "At least one reason from the 'Types of Occurences' is required<br />";
@@ -441,6 +489,7 @@
                     'selRphInv': selRphInv,
                     'txtExp': txtExp,
                     'op-code': opcode,
+                    'currentRCode': currentRCode,
                     'id': id
                 },
                 async: false,
@@ -506,6 +555,8 @@
             filter = where  + dates;
         }
 
+        console.log(filter)
+
         $.ajax({
             data: {
                 sql: `SELECT ID
@@ -537,6 +588,7 @@
                 html += '<td>' + dateCreate + '</td>';
                 html += '<td>' + facCode + '</td>';
                 html += '<td>' + createdBy + '</td>';
+                html += '<td>' + id + '</td>';
                 html += '<td>' + valid + '</td>';
                 html += `<td><a id="edit-user" href="#" onclick="edit_occurence(` + id + `,'` + facName +  `')" >Edit</a></td></tr>`;
                 
@@ -549,37 +601,42 @@
 
     function edit_occurence(id, facName){
         let cls = 'fActive';
+        let currCategory = null;
         $.ajax({
             data: {
                 sql: `SELECT r.ID
-                    ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
-                    ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
-                    ,[USERNAME]
-                    ,[FACILITY_CODE]
-                    ,[CREATED_BY]
-                    ,[USERNAME]
-                    ,[FACILITY_CODE]
-                    ,f.[DNAME] as [FAC_NAME]
-                    ,[PATIENT_NAME]
-                    ,[PERSON_REPORTING]
-                    ,[PHONE]
-                    ,[PERSON_COMPLETING]
-                    ,[ORDER_INTAKE]
-                    ,[MEDICATION]
-                    ,[SHIPPING]
-                    ,[DELIVERY]
-                    ,[BILLING]
-                    ,[COOKING]
-                    ,[OTHER]
-                    ,[TECH_ID]
-                    ,[RPH_ID]
-                    ,[EXPLANATION]
-                    ,[VALID]
-                    ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
-                    FROM dbo.[RPT_OCCUR] r
-                    LEFT JOIN CIPS.dbo.[FAC] f
-                    ON r.[FACILITY_CODE] = f.DCODE
-                    WHERE r.[ID] = `+ id
+                ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
+                ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
+                ,[USERNAME]
+                ,[FACILITY_CODE]
+                ,r.[CREATED_BY]
+                ,[USERNAME]
+                ,[FACILITY_CODE]
+                ,f.[DNAME] as [FAC_NAME]
+                ,[PATIENT_NAME]
+                ,[PERSON_REPORTING]
+                ,[PHONE]
+                ,[PERSON_COMPLETING]
+                ,[ORDER_INTAKE]
+                ,[MEDICATION]
+                ,[SHIPPING]
+                ,[DELIVERY]
+                ,[BILLING]
+                ,[COOKING]
+                ,[OTHER]
+                ,[TECH_ID]
+                ,[RPH_ID]
+                ,[EXPLANATION]
+                ,[VALID]
+                ,[REASON_CODE]
+                ,c.CATEGORY_CODE
+                ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
+                FROM dbo.[RPT_OCCUR] r
+                LEFT JOIN CIPS.dbo.[FAC] f
+                ON r.[FACILITY_CODE] = f.DCODE
+                LEFT JOIN RPT_REASONS c
+                ON r.REASON_CODE = c.ID
+                WHERE r.[ID] =`+ id
             },
             type: 'POST',
             url: '/getSearch',
@@ -590,19 +647,20 @@
                 $('#dateReport').val(item.DISCOVER_DATE);
                 $('#dateOccur').val(item.OCCUR_DATE);
                 $('#dateCreate').val(item.CREATED_AT);
+                $("#frmID").val(item.ID);
                 $("#selFac").val(item.FAC_NAME);
                 $("#txtFac").val(item.FAC_NAME);
                 $('#txtPatient').val(item.PATIENT_NAME);
                 $('#txtPerRept').val(item.PERSON_REPORTING);
                 $('#txtPhone').val(item.PHONE);
                 $('#selPerComp').val(item.PERSON_COMPLETING);
-                $('#selIntake').val(item.ORDER_INTAKE); 
-                $('#selMed').val(item.MEDICATION);
-                $('#selShipping').val(item.SHIPPING);
-                $('#selDelivery').val(item.DELIVERY);
-                $('#selBilling').val(item.BILLING);
-                $('#selCooking').val(item.COOKING);
-                $('#selOther').val(item.OTHER);
+                $('#selIntake').val("0"); 
+                $('#selMed').val("0");
+                $('#selShipping').val("0");
+                $('#selDelivery').val("0");
+                $('#selBilling').val("0");
+                $('#selCooking').val("0");
+                $('#selOther').val("0");
                 $('#selTechInv').val(item.TECH_ID);
                 $('#selRphInv').val(item.RPH_ID);
                 $('#txtExp').val(item.EXPLANATION);
@@ -610,6 +668,40 @@
                 $('#dMode').html("Update Mode");
                 $("#txtID").val(item.ID);
                 $("#current_status").val(item.VALID);
+                switch(item.CATEGORY_CODE) {
+                    case 'ORDIN':
+                        $('#selIntake').val(item.REASON_CODE); 
+                        currCategory = $('#selIntake');
+                        break;
+                    case 'MED':
+                        $('#selMed').val(item.REASON_CODE); 
+                        currCategory = $('#selMed');
+                        break;
+                    case 'SHIP':
+                        $('#selShipping').val(item.REASON_CODE); 
+                        currCategory = $('#selShipping');
+                        break;
+                    case 'DEL':
+                        $('#selDelivery').val(item.REASON_CODE); 
+                        currCategory = $('#selDelivery');
+                        break;
+                    case 'BILL':
+                        $('#selBilling').val(item.REASON_CODE); 
+                        currCategory = $('#selBilling');
+                        break;
+                    case 'COOK':
+                        $('#selCooking').val(item.REASON_CODE); 
+                        currCategory = $('#selCooking');
+                        break;
+                    case 'OU':
+                        $('#selOther').val(item.REASON_CODE); 
+                        currCategory = $('#selOther');
+                        break;
+                }
+                categorySelected = true;
+                $('.selType').attr('disabled', true);
+                currCategory.attr('disabled', false);
+
                 if (item.VALID == 0) {
                     $('.container').addClass(cls);
                     $("#btnVoid").text("Set Active");
@@ -657,7 +749,8 @@
         let cls = 'fActive';
         $('#dateReport').val("");
         $('#dateOccur').val("");
-        $('#dateCreate').val("1900-01-01");
+        $('#dateCreate').val(currentDate());
+        $('#frmID').val("New");
         $("#selFac" ).val("0")
         $("#txtFac" ).val("")
         $('#txtPatient').val("")
@@ -678,6 +771,8 @@
         $("#dMode").html("Add Mode");
         $('#opcode').val("insert");
         $("#dVoid").hide();
+        categorySelected = false;
+        $('.selType').attr('disabled',false);
         $('.container').removeClass(cls);
         $("#btnVoid").text("Void Current");
     }

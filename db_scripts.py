@@ -34,11 +34,13 @@ insert_occurence = """ INSERT INTO [dbo].[RPT_OCCUR]
             ,[OTHER]
             ,[TECH_ID]
             ,[RPH_ID]
+            ,[REASON_CODE]
             ,[EXPLANATION]
             ,[CREATED_AT]
             ,[CREATED_BY])
         VALUES
             (?
+            ,?
             ,?
             ,?
             ,?
@@ -79,6 +81,7 @@ update_occurence = """ UPDATE [dbo].[RPT_OCCUR]
         ,[OTHER] =  ?
         ,[TECH_ID] =  ?
         ,[RPH_ID] =  ?
+        ,[REASON_CODE] =  ?
         ,[EXPLANATION] =  ?
         ,[UPDATED_AT] = GETDATE()
         ,[UPDATED_BY] = ?
@@ -100,6 +103,7 @@ get_reasons_by_category = """ SELECT
     FROM [dbo].[RPT_REASONS] r
     INNER JOIN [RPT_CATEGORIES]c
     on r.[CATEGORY_CODE] = c.CODE
+    WHERE [ACTIVE] = 1
     ORDER BY [SORT_ORDER]"""
 
 update_users = """ UPDATE [dbo].[RPT_USERS]
@@ -137,7 +141,8 @@ get_users_username = """
     FROM [dbo].[RPT_USERS] u LEFT JOIN 
     (SELECT * FROM CTE) r
     on u.[ID] = r.[USER_ID]
-    WHERE [ROW_NUM] = 1  AND [USERNAME] = ?"""
+    WHERE [ROW_NUM] = 1 AND [ACTIVE] = 1
+    AND [USERNAME] = ?"""
 
 get_users = """ 
     ;WITH CTE AS (

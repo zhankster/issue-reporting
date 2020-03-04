@@ -38,9 +38,9 @@
 					<tr>
 						<th scope="col">Description</th>
 						<th scope="col">Sort Order</th>
-                        <th scope="col">Active</th>
-                        <th scope="col">Category</th>
-                        <th scope="col" colspan="2"></th>
+            <th scope="col">Active</th>
+            <th scope="col">Category</th>
+            <th scope="col" colspan="1">&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -66,7 +66,6 @@
 						<td>
 							<a id='edit-user' href="#" onclick="edit_user('{{c['code']}}')">Edit</a>
 						</td>
-						<td><a id='delete-user' href="#" onclick="delete_code({{c['code']}}, '{{c['description']}}', '{{ c['category_code'] }}', '{{ c['category'] }}')">Delete</a></td>
 					</tr>
 					{% endfor %}
 				</tbody>
@@ -115,11 +114,11 @@
 				<div class="col-sm-10">
 					<div class="form-check">
 						<input class="form-check-input" type="checkbox" id="active" name="active">		
-						<input type="hidden" id="op-code" name="op-code"/>
 						<input type="hidden" id="code-id" name="code-id"/>
 					</div>
 				</div>
-			</div>
+      </div>
+      <input type="hidden" id="op-code" name="op-code"/>
       </div>
       <div class="modal-footer">
         <button type="button" onclick="validateForm()" class="btn btn-primary">Save</button>
@@ -204,7 +203,8 @@
   });
 
 	function edit_user(code) {
-        $('#mtCode').html('Update Reason Code');
+        let stat = $("#" + code + "_active").val().trim() == "True" ? true : false;
+        $('#errMsg').html("");
         $('#addCode').modal('show');
         $('#code-id').val(code); ;
         $('#op-code').val("edit");        
@@ -213,7 +213,7 @@
         $('#selCategory').val($("#selCategories").val());
         $('#active').show();
         $('#tActive').show()
-        $('#active').prop('checked', $("#" + code + "_active").val());
+        $('#active').prop('checked', stat);
         $('#errMsg').val("");
     }
 	
@@ -240,7 +240,7 @@
     }
 
     function validateForm(){
-
+        $('#errMsg').html("");
         var opcode = $('#op-code').val(); 
         var code = $('#code-id').val();     
         var desc = $('#txtDesc').val();
@@ -249,7 +249,7 @@
         var cat = $('#selCategory  option:selected').val();
         var active = 1;
 
-        console.log(opcode);
+        console.log("op-code: " + opcode);
 
         var msg = "";
 
@@ -286,7 +286,7 @@
         else{
           if (opcode === 'edit')
           {
-            if ($(this).prop("#active") == true){
+            if ($("#active").prop("checked") == true){
               active = 1
             }
             else {

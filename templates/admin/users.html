@@ -203,6 +203,7 @@
 <script type="text/javascript">
 
 	function edit_user(user) {
+		let stat = $("#" + user + "_active").val().trim() == "True" ? true : false;
 		$('.modal-title').html('Update User');
 		$('#addUser').modal('show');
 		$('#user-id').val(user);
@@ -214,7 +215,7 @@
 		$('#selRole').val($("#" + user + "_role").val());
 		$('#active').show();
 		$('#sActive').show()
-		$('#active').prop('checked', $("#" + user + "_active").val());
+		$('#active').prop('checked', stat);
 		$('#op-code').val('update');
 	}
 	
@@ -294,7 +295,7 @@ function validateForm(){
 	}
 	else {
 		if (opcode === 'update') {
-			if ($(this).prop("#active") == true) {
+			if ($("#active").prop("checked") == true) {
 				active = 1
 			}
 			else {
