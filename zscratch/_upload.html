@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block body %}
+
+<script type="text/javascript">
+	var nav = document.getElementById("navOccur");
+	nav.className += " active";
+    nav.style.fontWeight = "bold";
+</script>
+<p>{{ facility }}<br />
+Date Reported: {{ date_rpt }}<br />
+ID: {{ id_rpt }}
+</p>
+<span id="file_name">{{ attFilename }}</span>
+<h5>Select a file to attach</h5>
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul class=flashes>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+<form method="post" action="/upload" id="frmUpload" enctype="multipart/form-data">
+    <dl>
+		<p>
+			<input type="file" name="file" autocomplete="off" required /> 
+			<input type="hidden" name="attFile" value="upload" />
+			<input type="hidden" name="attDate" value="{{ date_rpt }}" />
+			<input type="hidden" name="attID" value="{{ id_rpt }}" />
+			<input type="hidden" name="attFac" value="{{ facility }}" /> 
+		</p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+</form>
+{% endblock %}
+

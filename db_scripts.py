@@ -15,6 +15,19 @@ def get_json(sql):
 
     return items
 
+update_groups = """ UPDATE [dbo].[RPT_GROUPS]
+        SET [RECIPIENTS] = ?
+        WHERE [TARGET] = ? AND [USAGE] = ? 
+    """
+
+get_recipients = """ SELECT [RECIPIENTS]
+    FROM [RPT_GROUPS] 
+    WHERE [TARGET] = ? AND [USAGE] = ? 
+    """
+get_facility_info = """ SELECT SHORT_NAME, f.DNAME  FROM CIPS.dbo.FAC f
+	LEFT JOIN PGR p ON f.PGR_ID = p.ID
+WHERE f.DCODE = ? """
+
 insert_occurence = """ INSERT INTO [dbo].[RPT_OCCUR]
             ([USER_ID]
             ,[DISCOVER_DATE]
@@ -117,6 +130,7 @@ update_users = """ UPDATE [dbo].[RPT_USERS]
         ,[UPDATED_BY] = ?
         ,[ACTIVE] = ?
         ,[INITIALS] = ?
+        ,[EMAIL] = ?
     WHERE ID = ?
 """
 
@@ -136,6 +150,7 @@ get_users_username = """
             ,[PASSWORD]
             ,[ACTIVE]
             ,[INITIALS]
+            ,[EMAIL]
             ,r.[ROLE_ID]
 			,r.DESCRIPTION as ROLE_NAME
     FROM [dbo].[RPT_USERS] u LEFT JOIN 
@@ -163,6 +178,7 @@ get_users = """
             ,[UPDATED_BY]
             ,[ACTIVE]
             ,[INITIALS]
+            ,[EMAIL]
             ,r.[ROLE_ID]
 			,r.DESCRIPTION as ROLE_NAME
     FROM [dbo].[RPT_USERS] u LEFT JOIN 

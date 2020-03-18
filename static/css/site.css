@@ -50,3 +50,11 @@ h5{
 .fActive {
     background-color: #df0c0c;
 }
+
+.highlight{
+    background-color: #FFFF00;
+}
+
+.error{
+    color:#ff0000;
+}

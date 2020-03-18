@@ -31,3 +31,5 @@ FROM
 		ON o.OTHER = ou.ID
 	LEFT JOIN CIPS.dbo.FAC f
 		on o.FACILITY_CODE = f.DCODE
+
+		select CREATED_AT,* from RPT_OCCUR

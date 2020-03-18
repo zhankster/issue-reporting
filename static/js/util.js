@@ -17,3 +17,29 @@ function currentDate() {
 
     return today;
 }
+
+function pad(num){
+    var s = "" + num;
+    if ( num < 10 ) {
+      s = "0" + num; 
+    }
+    return s;
+}
+
+function removeLeading(num) {
+    return num.replace(/^(0+)/g, '')
+}
+
+function changeDateFormat(inputDate){  // expects Y-m-d
+    var splitDate = inputDate.split('-');
+    if(splitDate.count == 0){
+        return null;
+    }
+
+    var year = splitDate[0];
+    var month = removeLeading(splitDate[1]);
+    var day = removeLeading(splitDate[2]); 
+
+    return month + '/' + day + '/' + year;
+}
+

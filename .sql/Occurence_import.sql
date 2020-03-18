@@ -234,3 +234,37 @@ SELECT DISTINCT [COOKING_T],
 		
 		UPDATE Occurence SET ORDER_INTAKE_T = NULL
 		WHERE upper(ORDER_INTAKE_T) LIke '%*%'
+
+		SELECT r.ID
+                    ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
+                    ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
+                    ,[USERNAME]
+                    ,[FACILITY_CODE]
+                    ,r.[CREATED_BY]
+                    ,[USERNAME]
+                    ,[FACILITY_CODE]
+                    ,f.[DNAME] as [FAC_NAME]
+                    ,[PATIENT_NAME]
+                    ,[PERSON_REPORTING]
+                    ,[PHONE]
+                    ,[PERSON_COMPLETING]
+                    ,[ORDER_INTAKE]
+                    ,[MEDICATION]
+                    ,[SHIPPING]
+                    ,[DELIVERY]
+                    ,[BILLING]
+                    ,[COOKING]
+                    ,[OTHER]
+                    ,[TECH_ID]
+                    ,[RPH_ID]
+                    ,[EXPLANATION]
+                    ,[VALID]
+					,[REASON_CODE]
+					,c.CATEGORY_CODE
+                    ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
+                    FROM dbo.[RPT_OCCUR] r
+                    LEFT JOIN CIPS.dbo.[FAC] f
+                    ON r.[FACILITY_CODE] = f.DCODE
+					LEFT JOIN RPT_REASONS c
+					ON r.REASON_CODE = c.ID
+                    WHERE r.[ID] = 5

@@ -4,28 +4,39 @@ import json
 import pyodbc
 import time
 
-from flask import Flask, render_template, url_for, request, redirect, jsonify, session, make_response
-# Flask-LoginManager
-from datetime import datetime
+from flask import Flask, flash, render_template, url_for, request, redirect, jsonify, session, make_response
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+from xlrd import open_workbook
 import urllib 
+import pdfkit
+path_wkhtmltopdf = r'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+
 import db_scripts as dbs
+import util as pr
 
 # GLOBALS
 RX_CONNECTION_STRING='DRIVER={SQL Server};SERVER=localhost;DATABASE=RXBackend;Trusted_Connection=yes'
 CIPS_CONNECTION_STRING='DRIVER={SQL Server};SERVER=localhost;DATABASE=CIPS;Trusted_Connection=yes'
 REPORTNG_VERSION = '0.5'
+# UPLOAD_FOLDER = r'C:/inetpub/wwwroot/RxApps/static/pdf'
+UPLOAD_FOLDER = r'D:/Dev/FLW/Occurrence/static/pdf'
 
 ## Init APP
 app = Flask(__name__)
 app.secret_key = 'super secret string'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 login_manager = LoginManager()
 login_manager.session_protection='basic'
 login_manager.init_app(app)
 
 general_users = ('Administrator','User')
 pharm_redirect = "iou"
+
 
 def check_role(roles):
     if session['role'] not in roles:
@@ -40,47 +51,142 @@ class User(UserMixin):
 def index():
     return redirect(url_for('occur'))
 
+ALLOWED_EXTENSIONS = set([ 'pdf'])
+# ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    
+@app.route('/upload', methods=['POST','GET'])
+def upload():
+    dt = datetime.now()
+    date_rpt = None
+    id_rpt = None
+    facility = None
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    
+    if request.method == 'POST':
+        if request.form['attDate'] == 'null':
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                flash('No file selected for uploading')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):                              
+                id_rpt = request.form['attID'] 
+                date_rpt = request.form['attDateRet'] 
+                facility = request.form['attFac'] 
+                file.filename =  id_rpt + '_' + dt.strftime('%H%M%S%f') + '.pdf'
+                sql = 'UPDATE dbo.RPT_OCCUR SET UPLOAD = ? WHERE ID = ?'
+                params = (( file.filename, int(id_rpt) ))
+                cur.execute(sql, params)
+                conn.commit()
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                flash('File successfully uploaded')
+                # return redirect(url_for('upload'))
+                # return redirect('/upload')
+                return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
+            else:
+                flash('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
+                return redirect(request.url)
+        else:
+            date_rpt = request.form['attDate']
+            id_rpt = request.form['attID']
+            facility = request.form['attFac']
+            return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
+
+    return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
+
+
 
 @app.route("/occur", methods=["GET", "POST"])
 @login_required
 def occur():
-    page_title = "Occurences" 
+    page_title = "Occurences"
+    report_items = []
+    dt = datetime.now()
+    id_rpt = ''
+    pdf = None
+    mmg = ''
+    rpt_ts = dt.strftime('%H%M%S%f')
+    rpt_ts = str(round(datetime.utcnow().timestamp(),3))
+    print(rpt_ts)
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
     # print(session['userid'])
     
     if request.method == 'POST':
-        if request.form['op-code'] == 'insert':
-            sql = dbs.insert_occurence
-            params=((int(session['userid']), 
-                request.form['dateReport'], 
-                request.form['dateOccur'],
-                current_user.id,  
-                request.form['selFac'], 
-                request.form['txtPatient'], 
-                request.form['txtPerRept'], 
-                request.form['txtPhone'], 
-                int(request.form['selPerComp']), 
-                int(request.form['selIntake']), 
-                int(request.form['selMed']), 
-                int(request.form['selShipping']), 
-                int(request.form['selDelivery']), 
-                int(request.form['selBilling']), 
-                int(request.form['selCooking']), 
-                int(request.form['selOther']), 
-                int(request.form['selTechInv']), 
-                int(request.form['selRphInv']), #currentRCode
-                int(request.form['currentRCode']),
-                request.form['txtExp'],
-                session['initials']))
-            # print(params)
+        if request.form['op-code'] == 'insert' or request.form['op-code'] == 'reprint':
+            sql = dbs.get_facility_info
+            params=(( request.form['selFac'] ))
             cur.execute(sql, params)
-            conn.commit()
+            row = cur.fetchone()
+            mmg = row.SHORT_NAME
+            
+            d = collections.OrderedDict()
+            d['dateReport'] = request.form['dateReport']
+            d['dateOccur'] = request.form['dateOccur']
+            d['facCode'] = request.form['selFac']
+            d['facName'] = request.form['facName']
+            d['patient'] = request.form['txtPatient']
+            d['phone'] = request.form['txtPhone']
+            d['perCompName'] = request.form['perCompName']
+            d['dept'] = request.form['currentDept']
+            d['perRpt'] = request.form['txtPerRept']
+            d['reason'] = request.form['currentReason']
+            d['techName'] = request.form['techName']
+            d['rphName'] = request.form['rphName']
+            d['explanation'] = request.form['txtExp']
+            d['logo'] = '../static/images/ihs-pharmacy-logo.png'
+            d['mmg'] = mmg
+            
+            report_items.append(d)
+            
+            if request.form['op-code'] == 'insert': 
+                sql = dbs.insert_occurence
+                params=((int(session['userid']), 
+                        request.form['dateReport'], 
+                        request.form['dateOccur'],
+                        current_user.id,  
+                        request.form['selFac'], 
+                        request.form['txtPatient'], 
+                        request.form['txtPerRept'], 
+                        request.form['txtPhone'], 
+                        int(request.form['selPerComp']), 
+                        int(request.form['selTechInv']), 
+                        int(request.form['selRphInv']), #currentRCode
+                        int(request.form['currentRCode']),
+                        request.form['txtExp'],
+                        session['initials'],
+                        rpt_ts + '.PDF',))
+                sql = "{CALL dbo.rpt_put_occurence (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )}"
+                cur.execute(sql, params)
+                conn.commit()
+                
+                sql = "SELECT ID FROM RPT_OCCUR WHERE TIMESTAMP = ?"
+                params=(( rpt_ts ))
+                cur.execute(sql, params)
+                row = cur.fetchone()
+                id_rpt = str(row[0])
+                pr.print_report(report_items,'occur_rpt.html', rpt_ts)
+                objects_list = []
+                temp = {}
+                temp['id_rpt'] = id_rpt
+                temp['pdf'] = rpt_ts + '.PDF'
+                objects_list.append(temp)
+                return jsonify(objects_list)
+            
         elif request.form['op-code'] == 'delete':
             cur.execute("DELETE FROM dbo.RPT_REASONS WHERE ID=?", request.form['del_code'])
             conn.commit()
         elif request.form['op-code'] == 'update':
             sql = dbs.update_occurence
+            pdf = request.form['pdf']
             params=((int(session['userid']), 
             request.form['dateReport'], 
             request.form['dateOccur'],
@@ -103,14 +209,34 @@ def occur():
             request.form['txtExp'],
             session['initials'],
             int(request.form['id']) ))
+            
+            d = collections.OrderedDict()
+            d['dateReport'] = request.form['dateReport']
+            d['dateOccur'] = request.form['dateOccur']
+            d['facCode'] = request.form['selFac']
+            d['facName'] = request.form['facName']
+            d['patient'] = request.form['txtPatient']
+            d['phone'] = request.form['txtPhone']
+            d['perCompName'] = request.form['perCompName']
+            d['dept'] = request.form['currentDept']
+            d['perRpt'] = request.form['txtPerRept']
+            d['reason'] = request.form['currentReason']
+            d['techName'] = request.form['techName']
+            d['rphName'] = request.form['rphName']
+            d['explanation'] = request.form['txtExp']
+            d['logo'] = '../static/images/ihs-pharmacy-logo.png'
+            d['mmg'] = mmg
+            
+            report_items.append(d)
             # print(params)
             cur.execute(sql, params)
             conn.commit()
+            
+            pr.print_report(report_items,'occur_rpt.html', pdf.replace('.PDF', ''))
     
     sql = dbs.get_reasons_by_category
     cur.execute(sql) 
     
-    print(current_user.id)
     rows = cur.fetchall()
     reason_list = []
     for row in rows:
@@ -155,6 +281,14 @@ def occur():
         
     return render_template('occur.html', page_title = page_title, users=user_list, current_id=session['userid'],
                         reasons=reason_list, facilities=facility_list)
+    
+# @app.route("/occur/<int:userid>", methods=["GET"])
+# @login_required
+# def occur():
+#     page_title = "Occurences"
+#     report_items = []
+#     conn = pyodbc.connect(RX_CONNECTION_STRING)
+#     cur = conn.cursor()
 
 @app.route('/getSearch', methods=['POST'])
 def getSearch():
@@ -203,7 +337,9 @@ def login():
         u['role'] = row.ROLE_NAME
         u['initials'] = row.INITIALS
         u['userid'] = row.ID
-    
+    print(u['password'])
+    print(request.form['password'])
+    print(check_password_hash(u['password'], request.form['password']))
     if check_password_hash(u['password'], request.form['password']):		
         user = User()
         user.id = username
@@ -216,12 +352,41 @@ def login():
     else:
         errors = "Invalid Username or Password"
         return render_template('login.html', errors=errors, page_title = page_title) 
+    
+    
+@app.route("/admin/email", methods=["GET", "POST"])
+@login_required
+def admin_email():
+    if session['role'] != 'Administrator':
+        return redirect(url_for('occur'))
+    
+    page_title = "Email Groups"
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    
+    if request.method == 'POST':
+        if request.form['usage'] == 'email':
+            params=(( request.form['recipients'],request.form['target'],request.form['usage'] ))
+            sql = dbs.update_groups
+            print(request.form['recipients'],request.form['target'],request.form['usage'])
+            print(sql)
+            cur.execute(sql, params)
+            conn.commit()
+    
+    sql = dbs.get_recipients
+    params=(( 'occurrence','email' ))
+    cur.execute(sql, params)
+    row = cur.fetchone()
+    occ_recip = row[0].split(';')
+    print(occ_recip)
+    
+    return render_template('admin/email.html',occ_recip = occ_recip ,page_title = page_title) 
 
 @app.route("/admin/codes", methods=["GET", "POST"])
 @login_required
 def admin_codes():
     if session['role'] != 'Administrator':
-        return redirect(url_for('pending'))
+        return redirect(url_for('occur'))
     
     page_title = "Reason Codes"
     conn = pyodbc.connect(RX_CONNECTION_STRING)
@@ -290,7 +455,7 @@ def admin_codes():
 @login_required
 def admin_users():
     if session['role'] != 'Administrator':
-            return redirect(url_for('pending'))
+            return redirect(url_for('occur'))
     page_title = "User Manager"
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
@@ -299,16 +464,16 @@ def admin_users():
         if request.form['op-code'] == 'update':
             if len(request.form['txtPassword']) > 0:
                 password=generate_password_hash(request.form['txtPassword'])
-            sql = "{CALL dbo.rpt_update_user (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}"
-            params= ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'], generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], int(request.form['active']),session['initials'], int(request.form['user-id']) ))  
+            sql = "{CALL dbo.rpt_update_user (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}"
+            params= ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'], generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], int(request.form['active']),session['initials'], int(request.form['user-id']), request.form['txtEmail'] ))  
             cur.execute(sql, params)
             conn.commit()
         elif request.form['op-code'] == 'delete':			
             cur.execute("DELETE FROM RPT_USERS WHERE ID=?", int(request.form['del_user_id']))
             conn.commit()
         else:
-            sql = "{CALL rpt_put_user (?, ?, ?, ?, ?, ?, ?, ?)}" 
-            params = ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'],generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], session['initials']))			
+            sql = "{CALL rpt_put_user (?, ?, ?, ?, ?, ?, ?, ?, ?)}" 
+            params = ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'],generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], session['initials'],  request.form['txtEmail'] ))			
             cur.execute(sql, params)
             conn.commit()			
     
@@ -328,6 +493,7 @@ def admin_users():
         d['active'] = row.ACTIVE
         d['password'] = row.PASSWORD
         d['role'] = row.ROLE_ID
+        d['email'] = row.EMAIL
         objects_list.append(d)
 
     return render_template('admin/users.html', users=objects_list, page_title = page_title)

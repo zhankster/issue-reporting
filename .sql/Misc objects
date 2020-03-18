@@ -1,3 +1,24 @@
+ $('#dateReport').val()  = item. 
+ $('#dateOccur').val()  = item. 
+ $("#selFac option:selected" ).text().trim()  = item. 
+ $('#txtPatient').val().trim()  = item. 
+ $('#txtPerRept').val()  = item. 
+ $('#txtPhone').val()  = item. 
+ $('#selPerComp').val()  = item. 
+ $('#selIntake').val()  = item. 
+ $('#selMed').val()  = item. 
+ $('#selShipping').val()  = item. 
+ $('#selDelivery').val()  = item. 
+ $('#selBilling').val()  = item. 
+ $('#selCooking').val()  = item. 
+ $('#selOther').val()  = item. 
+ $('#selTechInv').val()  = item. 
+ $('#selRphInv').val()  = item. 
+ $('#txtExp').val()  = item. 
+ $('#opcode').val()  = item. 
+
+
+
 'username':
 'dateReport':
 'dateOccur':

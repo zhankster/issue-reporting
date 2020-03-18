@@ -215,6 +215,7 @@
         $('#tActive').show()
         $('#active').prop('checked', stat);
         $('#errMsg').val("");
+        $('#mtCode').html("Edit Reason");
     }
 	
 	function delete_code(code, desc, cat_code,category) {		
@@ -237,6 +238,7 @@
         $('#active').hide();
         $('#tActive').hide();
         $('#errMsg').html("");
+        $('#mtCode').html("Add Reason");
     }
 
     function validateForm(){

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block body %}
+<script type="text/javascript">
+	var nav = document.getElementById("navAdmin");
+	nav.className += " active";
+	nav.style.fontWeight = "bold";
+</script>
+<br/>
+<br/>
+<div class="container">
+  <div class="row">
+  <div class="col-md-3">
+    <h3>Occurrence reports</h3>
+  </div>
+  <div class="col-md-4">
+    <span id="errOcc" class="error"></span>
+  </div>
+</div>
+<table class="table thead-dark">
+  <thead class="thead-dark">
+  <tr>
+    <th>Recipients</th>
+    <th>Content</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>
+      <textarea id="txtRecOcc" name="txtRecOcc"  class="textbox" rows="4" cols="50">
+        {%- for r in occ_recip %}
+        {{ r }}
+        {%- endfor -%} 
+      </textarea>
+    </td>
+    <td>
+      <textarea id="txtConOcc" id="txtConOcc"  class="textbox" rows="4" cols="50">
+      </textarea>
+    </td>
+    <td style="vertical-align:top">
+      <button class="btn btn-primary btn-sm" id="btnSaveOcc" onclick="readRecipients('txtRecOcc','errOcc')">
+        Save
+      </button>
+    </td>
+  </tr>
+</tbody>
+
+</table>
+</div>
+
+
+<!-- UTIL Modal -->
+<div class="modal fade" id="delUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <form method="POST" action="{{url_for('admin_codes')}}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Code</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<div class="col-sm-10">
+      Are you sure want to delete &nbsp;<span id="delUserName" style="font-weight: bold;"></span>
+      <br />
+      In category: &nbsp;<span id="delCategory" style="font-weight: bold;"></span>
+      <br /><br />
+      <p style="font-weight: bold; color:red">Setting the code inactive instead will prevent possible reporting issues</p>
+			</div>
+      </div>
+      <div class="modal-footer">
+        <input type='hidden' id='op-code' name="op-code"/>
+        <input type='hidden' id='del_code' name="del_code"/>
+        <input type='hidden' id='delCatCode' name="delCatCode"/>
+        <button type="submit" class="btn btn-danger">DELETE</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">CANCEL</button>
+      </div>
+    </div>
+  </div>
+ </form>
+</div>
+<script type="text/javascript">
+  $(function(){
+      removeTextAreaWhiteSpace('txtRecOcc');
+
+      $(".textbox").keyup(function(){
+        $(this).addClass('highlight');
+      });
+
+  });
+
+  function removeTextAreaWhiteSpace(el) {
+      var lines = $("textarea[name="+ el +"]").val().split(/\n/);      
+      var texts = [];    
+      for (var i=0; i < lines.length; i++) {    
+        if (/\S/.test(lines[i])) {    
+          texts.push($.trim(lines[i]));    
+        }    
+      }    
+      var n = texts.toString().split(",").join("\n");    
+      $("textarea[name="+ el +"]") .val(n);
+    }
+
+  function groupData(target, usage, recipients) {
+      this.target = target;
+      this.usage = usage
+      this.recipients = recipients;
+  }
+
+  function postGroup(gData){
+    $.ajax({
+      type: "POST",
+      url: "{{url_for('admin_email')}}",
+      dataType: 'json',
+      data: gData, 
+      async: false,
+      success: function (data) {
+      },
+      complete: function (data) {
+          location.reload();
+      }
+  });
+
+  }
+
+    function isEmail(email) {
+      var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+      return regex.test(email);
+    }
+
+    function readRecipients(el, elErr, target) {
+      let lines = $('#' + el).val().split('\n');
+      let users = "";
+      let errMsg = "";
+      let line = ""
+      for(var i = 0;i < lines.length;i++){
+          line = lines[i].trim();
+          if (isEmail(line) ) {
+              users += line + ";";
+          }
+          else {
+            errMsg += '"'+ line + '" is not a valid email address<br />'; 
+          }
+      }
+
+      if (errMsg !== "") {
+          console.log(errMsg);
+          $('#' + elErr).html(errMsg);
+          
+          return errMsg;
+      }
+      else {
+          console.log(users);
+          $('#' + elErr).html("");
+          gp = new groupData('occurrence', 'email', users);
+          console.log(gp);
+          postGroup(gp);
+          return true;
+      }
+      console.log(users);
+
+    }
+
+
+
+
+</script>
+{% endblock %}

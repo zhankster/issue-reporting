@@ -60,6 +60,7 @@
                         <th scope="row">
 							{{ u['initials'] }}
 							<input type="hidden" id="{{ u['id'] }}_initials" name="'{{ u['id'] }}_initials'" value="{{ u['initials'] }}"/>
+							<input type="hidden" id="{{ u['id'] }}_email" name="'{{ u['id'] }}_email'" value="{{ u['email'] }}"/>
 						</th>
 						<th scope="row">
 							{{ u['active'] }}
@@ -117,11 +118,11 @@
 			</div>
 		</div>
 		<div class="form-group row">
-			<label for="txtxInitals" class="col-sm-2 col-form-label">Initials</label>
+			<label for="txtInitials" class="col-sm-2 col-form-label">Initials</label>
 			<div class="col-sm-10">
 				<input type="text" class="form-control" name="txtInitials" id="txtInitials" placeholder="Initials">
 			</div>
-        </div>
+		</div>
         <div class="form-group row">
 			<label for="selPosition" class="col-sm-2 col-form-label">Position</label>
 			<div class="col-sm-10">
@@ -129,7 +130,8 @@
 					<option value="RPH">RPH</option>
 					<option value="Pharm Tech">Pharm Tech</option>
                     <option value="Ship Tech">Ship Tech</option>
-					<option value="Accounting">Accounting</option>
+					<option value="Billing Tech">Billing Tech</option>
+					<option value="Admin">Admin</option>
 					<option value="Dev">Dev</option>
 					<option value=""></option>
 				</select>
@@ -146,6 +148,12 @@
 					<option value="5">Admin</option>
 					<option value=""></option>
 				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="txtEmail" class="col-sm-2 col-form-label">Email</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="txtEmail" id="txtEmail" placeholder="Email">
 			</div>
 		</div>
 		<div class="form-group row">
@@ -211,6 +219,7 @@
 		$('#txtFirstname').val($("#" + user + "_firstname").val());
 		$('#txtLastname').val($("#" + user + "_lastname").val());
 		$('#txtInitials').val($("#" + user + "_initials").val());
+		$('#txtEmail').val($("#" + user + "_email").val());
 		$('#selPosition').val($("#" + user + "_position").val());
 		$('#selRole').val($("#" + user + "_role").val());
 		$('#active').show();
@@ -233,7 +242,8 @@
 		$('#txtUsername').val("");
 		$('#txtFirstname').val("");
 		$('#txtLastname').val("");
-		$('#txtInitals').val("");
+		$('#txtInitials').val("");
+		$('#txtEmail').val("");
 		$('#selPosition').val("");
 		$('#txtPassword').val("");
 		$('#selRole').val("");
@@ -250,6 +260,7 @@ function validateForm(){
 	var firstname = $('#txtFirstname').val().trim();
 	var lastname = $('#txtLastname').val().trim();
 	var initials = $('#txtInitials').val().trim();
+	var email = $('#txtEmail').val().trim();
 	var position = $('#selPosition').val().trim();
 	var role = $('#selRole').val().trim();
 	var password = $('#txtPassword').val().trim();
@@ -320,6 +331,7 @@ function validateForm(){
 				,'op-code': opcode
 				,'active': active
 				,'txtInitials': initials
+				,'txtEmail' : email
 			},
 			async: false,
 			success: function (data) {

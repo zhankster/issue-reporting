@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+
+<script type="text/javascript">
+	var nav = document.getElementById("navOccur");
+	nav.className += " active";
+    nav.style.fontWeight = "bold";
+</script>
+<p><strong>Facility: </strong> {{ facility }}<br />
+	<strong>Date Reported:</strong> {{ date_rpt }}<br />
+	<strong>ID: </strong> {{ id_rpt }}
+	</p>
+	<h5>Select a file to attach</h5>
+	<p>
+		{% with messages = get_flashed_messages() %}
+		  {% if messages %}
+			<ul class=flashes>
+			{% for message in messages %}
+			  <li>{{ message }}</li>
+			{% endfor %}
+			</ul>
+		  {% endif %}
+		{% endwith %}
+	</p>
+	<form method="post" action="/upload" id="frmUpload" enctype="multipart/form-data">
+		<dl>
+			<p>
+				<input type="file" name="file" autocomplete="off" required>
+				<input type="hidden" name="attDate" value="null">
+				<input type="hidden" name="attDateRet" value="{{ date_rpt }}">
+				<input type="hidden" name="attID" value="{{ id_rpt }}">
+				<input type="hidden" name="attFac" value="{{ facility }}">
+			</p>
+		</dl>
+		<p>
+			<input type="submit" value="Submit">
+		</p>
+	</form>
+	<a href="{{url_for('index')}}" class="active" id="aOccur">Back to the Occurrence page</a>
+{% endblock %}
+
+
+

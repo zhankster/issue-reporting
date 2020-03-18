@@ -188,7 +188,7 @@
             <select type="text"  class="form-control form-control-sm" id="selTechInv" name="selTechInv">
                 <option value="0"></option>
                 {%- for u in users -%}
-                    {% if 'Tech' in u['position'] -%}
+                    {% if 'Pharm Tech' in u['position'] -%}
                         <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
                     {% endif %}
                 {%- endfor -%}
@@ -220,20 +220,15 @@
                 &nbsp;
             </div>
             <br /><br />
-            </form>
+        </form>
             <div class="float-right" id="dVoid" style="display:none">
-                <form action="/upload" id="frmUpload" method="POST">
                 <button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-warning rounded btn-sm btn-form">Void Current</button>&nbsp;
+                <form action="/upload" id="frmUpload" method="POST">
                     <input  type="submit" id="btnAttach" class="btn btn-primary rounded btn-sm btn-form" value="Add Attachment" />&nbsp;
-                    <input type="hidden" name="attFile" id="attFile"value="null" />
                     <input type="hidden" id="attFac" name="attFac" />
                     <input type="hidden" id="attID" name="attID" />
                     <input type="hidden" id="attDate" name="attDate" />
                 </form>
-                <br />
-                <a href="" id="aPDF" rel="" target="_blank">PDF Form</a>
-                <br />
-                <a href="" id="aUpload" rel="" target="_blank"></a>
             </div>
                 <input type="hidden" id="opcode" name="opcode" value="insert"/>
                 <input type="hidden" id="txtID" name="txtID" value="0"/>
@@ -244,6 +239,7 @@
                 <br />
         </div>
     </div>
+
     </div>
     <!-- Error Modal -->
     <div class="modal" id="mError">
@@ -378,8 +374,6 @@
     let currentDept = '';
 
     $(function(){
-        console.log(changeDateFormat('2020-03-05'));
-        console.log(changeDateFormat('2020-11-15'));
         $('#dateCreate').val(currentDate());
         $('#frmID').val("New");
 
@@ -406,6 +400,11 @@
 
     });
 
+    function attach(){
+
+
+    }
+
     function get_fac_name() {
         let fac = $("#selFac option:selected" ).val();
         $("#txtFac").val(fac);
@@ -418,8 +417,8 @@
 
     function validateForm() {
 
-        let dateReport = changeDateFormat($('#dateReport').val());
-        let dateOccur = changeDateFormat($('#dateOccur').val());
+        let dateReport = $('#dateReport').val();
+        let dateOccur = $('#dateOccur').val();
         let selFac = $("#selFac option:selected" ).text().trim();
         let facName = $('#txtFac').val().trim();
         let txtPatient = $('#txtPatient').val().trim();
@@ -440,12 +439,10 @@
         let rphName = $("#selRphInv option:selected" ).text().trim();
         let txtExp = $('#txtExp').val();
         let opcode =  $('#opcode').val();
-        let pdf = $("#aPDF").attr('rel');
         let id = "0";
 
         let msg = "";
         let type_count = 0;
-        console.log('selPerComp: ' + selPerComp);
 
         if(dateReport.trim() === "") {
             msg += "A date for discovery or reporting is required<br />";
@@ -453,11 +450,7 @@
         if(dateOccur.trim() === "") {
             msg += "An occurence date is required<br />";
         }
-        if(selPerComp.trim() === "0") {
-            msg += "A Person completing report must be selected<br />";
-        }
-
-        if(selFac.trim() === "0" || selFac.trim() === "") {
+        if(selFac.trim() === "0") {
             msg += "A Facility code is required<br />";
         }
         
@@ -510,25 +503,10 @@
                     'currentRCode': currentRCode,
                     'currentDept':currentDept,
                     'currentReason': currentReason,
-                    'pdf': pdf,
                     'id': id
                 },
                 async: false,
                 success: function (data) {
-                    console.log(data)
-                    $.each(data, function(k,v){
-                        console.log(v['id_rpt']);
-                        console.log(v['pdf']);
-                        $("#txtID").val(v['id_rpt']);
-                        $("#frmID").val(v['id_rpt']);
-                        $("#aPDF").attr('href','/static/pdf/' + v['pdf']);
-                        $("#aPDF").attr('rel', v['pdf']);
-                        $("#attID").val(v['id_rpt']);
-                        $("#attFac").val($("#txtFac").val());
-                        $("#attDate").val(currentDate());
-                        $('#dMode').html("Update Mode");
-                        $("#dVoid").show();
-                    })
                 },
                 complete: function (data) {
                     if (opcode === 'update'){
@@ -540,6 +518,7 @@
                         $('#tmInfo').html("Record Added");
                         $('#pmInfo').html("An Occurence reported on date '" +  dateReport + "' has been added")
                         $('#mInfo').modal('show');
+                        clearForm();
                     }
                     //location.reload();
                 }
@@ -630,7 +609,7 @@
 
     }
 
-    function edit_occurence(id, facName){
+function edit_occurence(id, facName){
         let cls = 'fActive';
         let currCategory = null;
         $.ajax({
@@ -661,8 +640,6 @@
                 ,[VALID]
                 ,[REASON_CODE]
                 ,c.CATEGORY_CODE
-                ,r.ATTACHMENT
-                ,r.UPLOAD
                 ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
                 FROM dbo.[RPT_OCCUR] r
                 LEFT JOIN CIPS.dbo.[FAC] f
@@ -701,19 +678,6 @@
                 $('#dMode').html("Update Mode");
                 $("#txtID").val(item.ID);
                 $("#current_status").val(item.VALID);
-                $("#attID").val(item.ID);
-                $("#attFac").val(item.FAC_NAME);
-                $("#attDate").val(item.CREATED_AT);
-                $("#aPDF").attr('href','/static/pdf/' + item.ATTACHMENT);
-                $("#aPDF").attr('rel', item.ATTACHMENT);
-                $("#aUpload").attr('href','/static/pdf/' + item.UPLOAD);
-                $("#aUpload").attr('rel', item.UPLOAD);
-                if (item.UPLOAD.trim() === ''){
-                    $("#aUpload").text('')
-                }
-                else{
-                    $("#aUpload").text('Attached File')
-                }
                 switch(item.CATEGORY_CODE) {
                     case 'ORDIN':
                         $('#selIntake').val(item.REASON_CODE); 
@@ -743,7 +707,7 @@
                     case 'COOK':
                         $('#selCooking').val(item.REASON_CODE); 
                         currCategory = $('#selCooking');
-                        currentDept = 'Medication Blister Card';
+                        currentDept = 'Cooking';
                         break;
                     case 'OU':
                         $('#selOther').val(item.REASON_CODE); 
@@ -791,7 +755,7 @@
 
     function openSearch() {
         $('#mSearch').modal('show');
-        $('#rbStart').prop("checked", true);
+        $('#rbStart').prop("checked", true);;
         $('#txtDateStart').val("");
         $('#txtDateEnd').val("");
         $('#txtFacSearch').val("");
@@ -811,7 +775,7 @@
         $('#txtPatient').val("")
         $('#txtPerRept').val("");
         $('#txtPhone').val("");
-        $("#selPerComp").val($("#current_id").val());
+        $('#selPerComp').val("0");
         $('#selIntake').val("0");
         $('#selMed').val("0");
         $('#selShipping').val("0");
@@ -826,10 +790,6 @@
         $("#dMode").html("Add Mode");
         $('#opcode').val("insert");
         $("#dVoid").hide();
-        $("#aPDF").attr('href','');
-        $("#aPDF").attr('rel', '');
-        $("#aUpload").attr('href','');
-        $("#aUpload").attr('rel', '');
         categorySelected = false;
         currentReason = '';
         currentCategory = '';
@@ -837,7 +797,7 @@
         $('.container').removeClass(cls);
         $("#btnVoid").text("Void Current");
     }
-    
+
     function voidForm() {
         let id = $("#txtID").val();
         var current_stat = $("#current_status").val().trim();
