@@ -24,6 +24,8 @@ ORDIN               	Order Entry                                                
 SHIP                	Shipping                                                                                            	ALL                 
 OU                  	Other\Uncategorized   
 
+
+--TRUNCATE TABLE RPT_OCCUR
 select * from RPT_REASONS
 where CATEGORY_CODE = 'ORDIN'
 order by CATEGORY_CODE, SORT_ORDER

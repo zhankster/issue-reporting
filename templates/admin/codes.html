@@ -211,6 +211,7 @@
         $('#txtDesc').val($("#" + code + "_desc").val());
         $('#txtSort').val($("#" + code + "_sort").val());
         $('#selCategory').val($("#selCategories").val());
+        $('#selCategory').prop('disabled', 'disabled');
         $('#active').show();
         $('#tActive').show()
         $('#active').prop('checked', stat);
@@ -235,6 +236,7 @@
         $('#txtSort').val("");
         $('#selCategory').val("");
         $('#active').prop('checked', true);
+        $('#selCategory').prop('disabled', false);
         $('#active').hide();
         $('#tActive').hide();
         $('#errMsg').html("");

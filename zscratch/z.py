@@ -1,3 +1,8 @@
+    if rpt_id != '0':
+        return getOccurItems(rpt_id)
+    else:
+        return getOccurItems("0") 
+
 @app.route('/upload', methods=['POST','GET'])
 def upload():
     dt = datetime.now()

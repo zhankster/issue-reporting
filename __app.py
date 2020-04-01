@@ -102,7 +102,6 @@ def upload():
 
     return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
 
-
 @app.route("/occur/", defaults={'rpt_id': '0'})
 @app.route("/occur/<rpt_id>", methods=["GET"])
 @login_required
@@ -168,11 +167,8 @@ def occur():
                     int(request.form['currentRCode']),
                     request.form['txtExp'],
                     session['initials'],
-                    rpt_ts + '.PDF',
-                    int(request.form['reqTech']),
-                    int(request.form['reqRph'])
-                    ))
-            sql = "{CALL dbo.rpt_put_occurence (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,? )}"
+                    rpt_ts + '.PDF',))
+            sql = "{CALL dbo.rpt_put_occurence (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )}"
             cur.execute(sql, params)
             conn.commit()
             print("Commit: ")
@@ -218,9 +214,7 @@ def occur():
             int(request.form['currentRCode']),
             request.form['txtExp'],
             session['initials'],
-            int(request.form['id']),
-            int(request.form['reqTech']),
-            int(request.form['reqRph']) ))
+            int(request.form['id']) ))
             
             d = collections.OrderedDict()
             d['dateReport'] = request.form['dateReport']
@@ -268,6 +262,7 @@ def getOccurItems(rpt_id):
     page_title = "Occurences"
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
+    
     sql = dbs.get_reasons_by_category
     cur.execute(sql) 
     
@@ -586,3 +581,181 @@ if __name__ == "__main__":
     
 # if __name__ == "__main__":
 #     app.run(host= '0.0.0.0')
+
+# @app.route("/occur", methods=["GET", "POST"])
+# @login_required
+# def occur():
+#     page_title = "Occurences"
+#     report_items = []
+#     dt = datetime.now()
+#     id_rpt = ''
+#     pdf = None
+#     mmg = ''
+#     rpt_ts = dt.strftime('%H%M%S%f')
+#     rpt_ts = str(round(datetime.utcnow().timestamp(),3))
+#     print(rpt_ts)
+#     conn = pyodbc.connect(RX_CONNECTION_STRING)
+#     cur = conn.cursor()
+#     # print(session['userid'])
+    
+#     if request.method == 'POST':
+#         if request.form['op-code'] == 'insert' or request.form['op-code'] == 'reprint':
+#             sql = dbs.get_facility_info
+#             params=(( request.form['selFac'] ))
+#             cur.execute(sql, params)
+#             row = cur.fetchone()
+#             mmg = row.SHORT_NAME
+            
+#             d = collections.OrderedDict()
+#             d['dateReport'] = request.form['dateReport']
+#             d['dateOccur'] = request.form['dateOccur']
+#             d['facCode'] = request.form['selFac']
+#             d['facName'] = request.form['facName']
+#             d['patient'] = request.form['txtPatient']
+#             d['phone'] = request.form['txtPhone']
+#             d['perCompName'] = request.form['perCompName']
+#             d['dept'] = request.form['currentDept']
+#             d['perRpt'] = request.form['txtPerRept']
+#             d['reason'] = request.form['currentReason']
+#             d['techName'] = request.form['techName']
+#             d['rphName'] = request.form['rphName']
+#             d['explanation'] = request.form['txtExp']
+#             d['logo'] = '../static/images/ihs-pharmacy-logo.png'
+#             d['mmg'] = mmg
+            
+#             report_items.append(d)
+            
+#             if request.form['op-code'] == 'insert': 
+#                 sql = dbs.insert_occurence
+#                 params=((int(session['userid']), 
+#                         request.form['dateReport'], 
+#                         request.form['dateOccur'],
+#                         current_user.id,  
+#                         request.form['selFac'], 
+#                         request.form['txtPatient'], 
+#                         request.form['txtPerRept'], 
+#                         request.form['txtPhone'], 
+#                         int(request.form['selPerComp']), 
+#                         int(request.form['selTechInv']), 
+#                         int(request.form['selRphInv']), #currentRCode
+#                         int(request.form['currentRCode']),
+#                         request.form['txtExp'],
+#                         session['initials'],
+#                         rpt_ts + '.PDF',))
+#                 sql = "{CALL dbo.rpt_put_occurence (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )}"
+#                 cur.execute(sql, params)
+#                 conn.commit()
+                
+#                 sql = "SELECT ID FROM RPT_OCCUR WHERE TIMESTAMP = ?"
+#                 params=(( rpt_ts ))
+#                 cur.execute(sql, params)
+#                 row = cur.fetchone()
+#                 id_rpt = str(row[0])
+#                 pr.print_report(report_items,'occur_rpt.html', rpt_ts)
+#                 objects_list = []
+#                 temp = {}
+#                 temp['id_rpt'] = id_rpt
+#                 temp['pdf'] = rpt_ts + '.PDF'
+#                 objects_list.append(temp)
+#                 return jsonify(objects_list)
+            
+#         elif request.form['op-code'] == 'delete':
+#             cur.execute("DELETE FROM dbo.RPT_REASONS WHERE ID=?", request.form['del_code'])
+#             conn.commit()
+#         elif request.form['op-code'] == 'update':
+#             sql = dbs.update_occurence
+#             pdf = request.form['pdf']
+#             params=((int(session['userid']), 
+#             request.form['dateReport'], 
+#             request.form['dateOccur'],
+#             current_user.id,  
+#             request.form['selFac'], 
+#             request.form['txtPatient'], 
+#             request.form['txtPerRept'], 
+#             request.form['txtPhone'], 
+#             int(request.form['selPerComp']), 
+#             int(request.form['selIntake']), 
+#             int(request.form['selMed']), 
+#             int(request.form['selShipping']), 
+#             int(request.form['selDelivery']), 
+#             int(request.form['selBilling']), 
+#             int(request.form['selCooking']), 
+#             int(request.form['selOther']), 
+#             int(request.form['selTechInv']), 
+#             int(request.form['selRphInv']), 
+#             int(request.form['currentRCode']),
+#             request.form['txtExp'],
+#             session['initials'],
+#             int(request.form['id']) ))
+            
+#             d = collections.OrderedDict()
+#             d['dateReport'] = request.form['dateReport']
+#             d['dateOccur'] = request.form['dateOccur']
+#             d['facCode'] = request.form['selFac']
+#             d['facName'] = request.form['facName']
+#             d['patient'] = request.form['txtPatient']
+#             d['phone'] = request.form['txtPhone']
+#             d['perCompName'] = request.form['perCompName']
+#             d['dept'] = request.form['currentDept']
+#             d['perRpt'] = request.form['txtPerRept']
+#             d['reason'] = request.form['currentReason']
+#             d['techName'] = request.form['techName']
+#             d['rphName'] = request.form['rphName']
+#             d['explanation'] = request.form['txtExp']
+#             d['logo'] = '../static/images/ihs-pharmacy-logo.png'
+#             d['mmg'] = mmg
+            
+#             report_items.append(d)
+#             # print(params)
+#             cur.execute(sql, params)
+#             conn.commit()
+            
+#             pr.print_report(report_items,'occur_rpt.html', pdf.replace('.PDF', ''))
+    
+#     sql = dbs.get_reasons_by_category
+#     cur.execute(sql) 
+    
+#     rows = cur.fetchall()
+#     reason_list = []
+#     for row in rows:
+#         d = collections.OrderedDict()
+#         # print(row.CODE)
+#         d['id'] = row.ID
+#         d['code'] = row.CODE
+#         d['reason_desc'] = row.REASON_DESC
+#         d['category_desc'] = row.CATEGORY_DESC
+#         d['sort_order'] = row.SORT_ORDER
+#         d['category_code'] = row.CATEGORY_CODE
+#         reason_list.append(d)
+        
+#     sql = dbs.get_users
+#     cur.execute(sql) 
+    
+#     rows = cur.fetchall()
+#     user_list = []
+#     for row in rows:
+#         d = collections.OrderedDict()
+#         d['id'] = row.ID
+#         d['useranme'] = row.USERNAME
+#         d['firstname'] = row.FIRST_NAME
+#         d['lastname'] = row.LAST_NAME
+#         d['username'] = row.USERNAME
+#         d['position'] = row.POSITION
+#         d['role'] = row.ROLE_NAME
+#         user_list.append(d)
+#     sql = dbs.get_facilities
+#     conn = pyodbc.connect(CIPS_CONNECTION_STRING)
+#     cur = conn.cursor()
+#     cur.execute(sql) 
+    
+#     rows = cur.fetchall()
+#     facility_list = []
+#     for row in rows:
+#         d = collections.OrderedDict()
+#         d['id'] = row.ID
+#         d['code'] = row.DCODE
+#         d['name'] = row.DNAME
+#         facility_list.append(d)
+        
+#     return render_template('occur.html', page_title = page_title, users=user_list, current_id=session['userid'],
+#                         reasons=reason_list, facilities=facility_list)

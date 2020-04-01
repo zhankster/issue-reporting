@@ -81,13 +81,15 @@
                 <select type="text"  class="form-control form-control-sm" id="selPerComp" name="selPerComp">
                 <option value="0"></option>
                 {%- for u in users %}
+                    {% if ('Admin' not in u['position'] and 'Dev' not in u['position'])  -%}
                         <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
+                    {% endif %}
                 {%- endfor -%}
                 </select>
             </div>
         </div>
     <hr>
-    <div class="d-flex justify-content-center"><h5>Types of Occurrences</h5></div>
+    <div class="d-flex justify-content-center"><h5>Primary Department Involved</h5></div>
     <div class="form-group row ">
         <div class="col-sm-4">
             <label for="selIntake" id="selIntakeL" class="small">Order Entry</label>
@@ -101,7 +103,18 @@
             </select>
         </div>
         <div class="col-sm-4">
-            <label for="selMed" id="selMedL" class="small">Medication</label>
+            <label for="selDelivery" id="selDeliveryL" class="small">Pharmacist</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selDelivery" name="selDelivery" >
+                <option value="0"></option>
+                {%- for r in reasons -%}
+                    {% if 'DEL' in r['code'] -%}
+                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                    {% endif %}
+                {%- endfor -%}
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <label for="selMed" id="selMedL" class="small">Automed</label>
             <select type="text"  class="form-control form-control-sm selType" id="selMed" name="selMed" >
                 <option value="0"></option>
                 {%- for r in reasons -%}
@@ -111,26 +124,14 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-sm-4">
-            <label for="selShipping" id="selShippingL" class="small">Shipping</label>
-            <select type="text"  class="form-control form-control-sm selType" id="selShipping" name="selShipping">
-                <option value="0"></option>
-                {%- for r in reasons -%}
-                    {% if 'SHIP' in r['code'] -%}
-                        <option value="{{ r.id }}">{{ r.reason_desc }}</option>
-                    {% endif %}
-                {%- endfor -%}
-            </select>
-        </div>
-    </div>
-
+    </div>  
     <div class="form-group row ">
         <div class="col-sm-4">
-            <label for="selDelivery" id="selDeliveryL" class="small">Delivery</label>
-            <select type="text"  class="form-control form-control-sm selType" id="selDelivery" name="selDelivery" >
+            <label for="selCooking" id="selCookingL" class="small">Med Card</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selCooking" name="selCooking" >
                 <option value="0"></option>
                 {%- for r in reasons -%}
-                    {% if 'DEL' in r['code'] -%}
+                    {% if 'COOK' in r['code'] -%}
                         <option value="{{ r.id }}">{{ r.reason_desc }}</option>
                     {% endif %}
                 {%- endfor -%}
@@ -148,23 +149,20 @@
             </select>
         </div>
         <div class="col-sm-4">
-            <label for="selCooking" id="selCookingL" class="small">Medication Blister Card</label>
-            <select type="text"  class="form-control form-control-sm selType" id="selCooking" name="selCooking" >
+            <label for="selShipping" id="selShippingL" class="small">Shipping</label>
+            <select type="text"  class="form-control form-control-sm selType" id="selShipping" name="selShipping">
                 <option value="0"></option>
                 {%- for r in reasons -%}
-                    {% if 'COOK' in r['code'] -%}
+                    {% if 'SHIP' in r['code'] -%}
                         <option value="{{ r.id }}">{{ r.reason_desc }}</option>
                     {% endif %}
                 {%- endfor -%}
             </select>
         </div>
     </div>
-    <div class="form-group row ">
-
-
-
+<div class="form-group row ">
         <div class="col-sm-4">
-            <label for="selOther" id="selOtherL" class="small">Other\Uncategorized</label>
+            <label for="selOther" id="selOtherL" class="small">Other</label>
             <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther" >
                 <option value="0"></option>
                 {%- for r in reasons -%}
@@ -183,9 +181,9 @@
 
 
     <div class="form-group row ">
-        <div class="col-sm-5">
-            <label for="selTechInv" class="small">Tech Invovled</label>
-            <select type="text"  class="form-control form-control-sm" id="selTechInv" name="selTechInv">
+        <div class="col-sm-3">
+            <label for="selTechInv" class="small ">Tech Invovled</label>
+            <select type="text"  class="form-control form-control-sm setReq" alt="Tech" id="selTechInv" name="selTechInv">
                 <option value="0"></option>
                 {%- for u in users -%}
                     {% if 'Tech' in u['position'] -%}
@@ -195,12 +193,17 @@
 
             </select>
         </div>
+        <div class="col-sm-2">
+            <br />
+            <label for="cbTechReq" class="small">Require Signature</label>
+            <input type="checkbox" id="cbTechReq"  name="cbTechReq" />
+        </div>
         <div class="col-md-2">
             &nbsp;
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-3">
             <label for="selRphInv" class="small">RPH Invovled</label>
-            <select type="text"  class="form-control form-control-sm" id="selRphInv" name="selRphInv" >
+            <select type="text"  class="form-control form-control-sm setReq" alt="RPH" id="selRphInv" name="selRphInv" >
                 <option value="0"></option>
                 {%- for u in users %}
                     {% if 'RPH' in u['position'] -%}
@@ -209,12 +212,18 @@
                 {%- endfor -%}
             </select>
         </div>
+    <div class="col-sm-2">
+        <br />
+        <label for="cbRphReq" class="small">Require Signature</label>
+        <input type="checkbox" id="cbRphReq"  name="cbRphReq" />
     </div>
+</div>
     <div class="form-group row">
         <div class="col-md-3" >
             <br /> 
             <div class='float-right'>
-                <button type="button" class="btn btn-secondary rounded btn-sm btn-form" onclick="clearForm()">Clear Form</button>
+                <!-- <button type="button" class="btn btn-secondary rounded btn-sm btn-form" onclick="clearForm()">Clear Form</button> -->
+                <a href="/" class="btn btn-secondary rounded btn-sm btn-form">Clear Form</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <button type="button" onclick="validateForm()"  class="btn btn-primary btn-sm rounded btn-form">Submit</button>
                 &nbsp;
@@ -231,7 +240,7 @@
                     <input type="hidden" id="attDate" name="attDate" />
                 </form>
                 <br />
-                <a href="" id="aPDF" rel="" target="_blank">PDF Form</a>
+                <a href="" id="aPDF" rel="" target="_blank"></a>
                 <br />
                 <a href="" id="aUpload" rel="" target="_blank"></a>
             </div>
@@ -378,10 +387,17 @@
     let currentDept = '';
 
     $(function(){
-        console.log(changeDateFormat('2020-03-05'));
-        console.log(changeDateFormat('2020-11-15'));
+        let rpt_id = {{ rpt_id }};
+        console.log('Curr ID:' + rpt_id);
         $('#dateCreate').val(currentDate());
         $('#frmID').val("New");
+        console.log(rpt_id);
+
+        if (String(rpt_id) !== '0' ) {
+            $('#frmID').val(rpt_id);
+            $('#txtID').val(rpt_id);
+            edit_occurence(rpt_id, '');
+        }
 
         $("#selPerComp").val($("#current_id").val());
 
@@ -404,6 +420,18 @@
             }
         });
 
+        $(".setReq").change(function(){ 
+                let typ = $(this).attr("alt");
+                let $cbox = (typ == "Tech") ? $("#cbTechReq" ) :  $("#cbRphReq" ) ;
+
+                if ($(this).val() !== "0") {
+                    $cbox.prop( "checked", true );
+                }
+                else{
+                    $cbox.prop( "checked", false );
+                }
+        });
+
     });
 
     function get_fac_name() {
@@ -417,9 +445,8 @@
     }
 
     function validateForm() {
-
-        let dateReport = changeDateFormat($('#dateReport').val());
-        let dateOccur = changeDateFormat($('#dateOccur').val());
+        let dateReport = $('#dateReport').val();
+        let dateOccur = $('#dateOccur').val();
         let selFac = $("#selFac option:selected" ).text().trim();
         let facName = $('#txtFac').val().trim();
         let txtPatient = $('#txtPatient').val().trim();
@@ -441,7 +468,11 @@
         let txtExp = $('#txtExp').val();
         let opcode =  $('#opcode').val();
         let pdf = $("#aPDF").attr('rel');
+        let reqTech = ($("#cbTechReq").prop("checked") == true) ? 1 : 0;
+        let reqRph = ($("#cbRphReq").prop("checked") == true) ? 1 : 0;
         let id = "0";
+
+        console.log(reqTech , reqRph);
 
         let msg = "";
         let type_count = 0;
@@ -480,6 +511,9 @@
             }
         }
 
+        dateReport = changeDateFormat($('#dateReport').val());
+        dateOccur = changeDateFormat($('#dateOccur').val());
+
             $.ajax({
                 type: "POST",
                 url: "{{url_for('occur')}}",
@@ -511,6 +545,8 @@
                     'currentDept':currentDept,
                     'currentReason': currentReason,
                     'pdf': pdf,
+                    'reqTech': reqTech,
+                    'reqRph' : reqRph,
                     'id': id
                 },
                 async: false,
@@ -523,6 +559,7 @@
                         $("#frmID").val(v['id_rpt']);
                         $("#aPDF").attr('href','/static/pdf/' + v['pdf']);
                         $("#aPDF").attr('rel', v['pdf']);
+                        $("#aPDF").html('PDF Form');
                         $("#attID").val(v['id_rpt']);
                         $("#attFac").val($("#txtFac").val());
                         $("#attDate").val(currentDate());
@@ -664,6 +701,8 @@
                 ,r.ATTACHMENT
                 ,r.UPLOAD
                 ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
+                ,r.TECH_REQ_VERIFY
+                ,r.RPH_REQ_VERIFY
                 FROM dbo.[RPT_OCCUR] r
                 LEFT JOIN CIPS.dbo.[FAC] f
                 ON r.[FACILITY_CODE] = f.DCODE
@@ -706,8 +745,13 @@
                 $("#attDate").val(item.CREATED_AT);
                 $("#aPDF").attr('href','/static/pdf/' + item.ATTACHMENT);
                 $("#aPDF").attr('rel', item.ATTACHMENT);
+                $("#aPDF").html('PDF Form');
                 $("#aUpload").attr('href','/static/pdf/' + item.UPLOAD);
                 $("#aUpload").attr('rel', item.UPLOAD);
+                let stat_t = item.TECH_REQ_VERIFY == "1" ? true : false;
+                let stat_r = item.RPH_REQ_VERIFY == "1" ? true : false;
+                $('#cbTechReq').prop('checked', stat_t);
+                $('#cbRphReq').prop('checked', stat_r);
                 if (item.UPLOAD.trim() === ''){
                     $("#aUpload").text('')
                 }
@@ -743,7 +787,7 @@
                     case 'COOK':
                         $('#selCooking').val(item.REASON_CODE); 
                         currCategory = $('#selCooking');
-                        currentDept = 'Medication Blister Card';
+                        currentDept = 'Med Card';
                         break;
                     case 'OU':
                         $('#selOther').val(item.REASON_CODE); 
@@ -828,6 +872,7 @@
         $("#dVoid").hide();
         $("#aPDF").attr('href','');
         $("#aPDF").attr('rel', '');
+        $("#aPDF").html('');
         $("#aUpload").attr('href','');
         $("#aUpload").attr('rel', '');
         categorySelected = false;
