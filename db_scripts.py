@@ -15,6 +15,113 @@ def get_json(sql):
 
     return items
 
+def add_activity(activity,user, description):
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    sql = """ INSERT INTO [RPT_ACTIVITY]
+        ([ACTIVITY]
+        ,[USER]
+        ,[DESCRIPTION])
+     VALUES
+        (?
+        ,?
+        ,? )"""
+    
+    params=(( activity, int(user), description ))
+    cur.execute(sql, params)
+    conn.commit()
+
+def get_signoff_users(filter):
+    return """ SELECT RPT_OCCUR.ID,
+    FORMAT (RPT_OCCUR.DISCOVER_DATE, 'MM/dd/yyyy ')  DISCOVER_DATE, 
+    FORMAT (RPT_OCCUR.OCCUR_DATE, 'MM/dd/ yyyy ') OCCUR_DATE, 	
+    RPT_OCCUR.CREATED_AT,
+	CASE WHEN TECH_REQ_VERIFY <> 0 AND TECH_VERIFY_DATE IS NULL 
+		THEN  RPT_USERS_TECH.FIRST_NAME + ' ' + RPT_USERS_TECH.LAST_NAME
+	ELSE '' END AS TECH_NAME,
+	CASE WHEN RPH_REQ_VERIFY <> 0 AND RPH_VERIFY_DATE IS NULL 
+		THEN  RPT_USERS_RPH.FIRST_NAME + ' ' + RPT_USERS_RPH.LAST_NAME
+	ELSE '' END AS RPH_NAME,
+	CASE WHEN TECH_REQ_VERIFY <> 0 AND TECH_VERIFY_DATE IS NULL 
+		THEN  TECH_ID
+	ELSE 0 END AS TECH_ID_SIGN,
+	CASE WHEN RPH_REQ_VERIFY <> 0 AND RPH_VERIFY_DATE IS NULL 
+		THEN  RPH_ID
+	ELSE 0 END AS RPH_ID_SIGN,
+    RPT_USERS_TECH.FIRST_NAME + ' ' + RPT_USERS_TECH.LAST_NAME TECH,
+    RPT_USERS_RPH.FIRST_NAME + ' ' + RPT_USERS_RPH.LAST_NAME RPH,
+    RPT_USERS_COMP.FIRST_NAME + ' ' + RPT_USERS_COMP.LAST_NAME PER_COMP,
+	RPT_OCCUR.FACILITY_CODE, 
+	RPT_OCCUR.PATIENT_NAME,  
+	RPT_OCCUR.EXPLANATION,
+    RPT_OCCUR.PHONE,
+    FAC.DNAME,
+	RPT_OCCUR.PERSON_REPORTING,
+    RPT_REASONS.DESCRIPTION REASON,
+	RPT_USERS_TECH.FIRST_NAME, RPT_USERS_TECH.LAST_NAME,
+    RPT_USERS_RPH.FIRST_NAME, RPT_USERS_RPH.LAST_NAME,
+    RPT_CATEGORIES.DESCRIPTION DEPT,
+	RPT_OCCUR.TECH_REQ_VERIFY,
+	RPT_OCCUR.TECH_VERIFY_DATE,
+	RPT_OCCUR.RPH_REQ_VERIFY,
+	RPT_OCCUR.RPH_VERIFY_DATE,
+	RPT_OCCUR.TECH_ID,
+	RPT_OCCUR.RPH_ID,
+	RPT_OCCUR.PERSON_COMPLETING
+FROM
+    RXBackend.dbo.RPT_OCCUR RPT_OCCUR 
+	LEFT OUTER JOIN RXBackend.dbo.RPT_REASONS RPT_REASONS ON
+        RPT_OCCUR.REASON_CODE = RPT_REASONS.ID
+        LEFT OUTER JOIN RXBackend.dbo.RPT_USERS RPT_USERS_RPH ON
+        RPT_OCCUR.RPH_ID = RPT_USERS_RPH.ID
+        LEFT OUTER JOIN RXBackend.dbo.RPT_USERS RPT_USERS_TECH ON
+        RPT_OCCUR.TECH_ID = RPT_USERS_TECH.ID
+        LEFT OUTER JOIN RXBackend.dbo.RPT_USERS RPT_USERS_COMP ON
+        RPT_OCCUR.PERSON_COMPLETING = RPT_USERS_COMP.ID
+        LEFT OUTER JOIN RXBackend.dbo.FAC FAC ON
+        RPT_OCCUR.FACILITY_CODE = FAC.DCODE
+        LEFT OUTER JOIN RXBackend.dbo.RPT_CATEGORIES RPT_CATEGORIES ON
+        RPT_REASONS.CATEGORY_CODE = RPT_CATEGORIES.CODE
+WHERE ((RPH_REQ_VERIFY <> 0 AND RPH_VERIFY_DATE IS NULL) OR (TECH_REQ_VERIFY <> 0 AND TECH_VERIFY_DATE IS NULL) )"""+ filter 
+
+get_occur_details = """  SELECT r.ID
+                ,CONVERT(char(10),[DISCOVER_DATE],126) as DISCOVER_DATE
+                ,CONVERT(char(10), [OCCUR_DATE],126) as OCCUR_DATE
+                ,[USERNAME]
+                ,[FACILITY_CODE]
+                ,r.[CREATED_BY]
+                ,[USERNAME]
+                ,[FACILITY_CODE]
+                ,f.[DNAME] as [FAC_NAME]
+                ,[PATIENT_NAME]
+                ,[PERSON_REPORTING]
+                ,[PHONE]
+                ,[PERSON_COMPLETING]
+                ,[ORDER_INTAKE]
+                ,[MEDICATION]
+                ,[SHIPPING]
+                ,[DELIVERY]
+                ,[BILLING]
+                ,[COOKING]
+                ,[OTHER]
+                ,[TECH_ID]
+                ,[RPH_ID]
+                ,[EXPLANATION]
+                ,[VALID]
+                ,[REASON_CODE]
+                ,c.CATEGORY_CODE
+                ,r.ATTACHMENT
+                ,r.UPLOAD
+                ,CONVERT(varchar, [CREATED_AT], 23) as [CREATED_AT]
+                ,r.TECH_REQ_VERIFY
+                ,r.RPH_REQ_VERIFY
+                FROM dbo.[RPT_OCCUR] r
+                LEFT JOIN CIPS.dbo.[FAC] f
+                ON r.[FACILITY_CODE] = f.DCODE
+                LEFT JOIN RPT_REASONS c
+                ON r.REASON_CODE = c.ID
+                WHERE r.[ID] = ? """
+
 update_groups = """ UPDATE [dbo].[RPT_GROUPS]
         SET [RECIPIENTS] = ?
         WHERE [TARGET] = ? AND [USAGE] = ? 
@@ -98,6 +205,8 @@ update_occurence = """ UPDATE [dbo].[RPT_OCCUR]
         ,[EXPLANATION] =  ?
         ,[UPDATED_AT] = GETDATE()
         ,[UPDATED_BY] = ?
+        ,[TECH_REQ_VERIFY] = ?
+        ,[RPH_REQ_VERIFY] = ?
     WHERE ID = ?
 """
 

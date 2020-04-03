@@ -9,7 +9,7 @@ from flask_login import LoginManager, UserMixin, login_required, login_user, log
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from xlrd import open_workbook
+# from xlrd import open_workbook
 import urllib 
 import pdfkit
 path_wkhtmltopdf = r'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
@@ -88,6 +88,7 @@ def upload():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 flash('File successfully uploaded')
+                dbs.add_activity('UPLOAD ',session['userid'], 'RPT_OCCUR, ID:' + id_rpt )
                 # return redirect(url_for('upload'))
                 # return redirect('/upload')
                 return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
@@ -120,7 +121,6 @@ def occur():
     mmg = ''
     rpt_ts = dt.strftime('%H%M%S%f')
     rpt_ts = str(round(datetime.utcnow().timestamp(),3))
-    print(rpt_ts)
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
     # print(session['userid'])
@@ -218,9 +218,9 @@ def occur():
             int(request.form['currentRCode']),
             request.form['txtExp'],
             session['initials'],
-            int(request.form['id']),
             int(request.form['reqTech']),
-            int(request.form['reqRph']) ))
+            int(request.form['reqRph']), 
+            int(request.form['id']) ))
             
             d = collections.OrderedDict()
             d['dateReport'] = request.form['dateReport']
@@ -243,10 +243,121 @@ def occur():
             # print(params)
             cur.execute(sql, params)
             conn.commit()
+            dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + request.form['id'])
             
             pr.print_report(report_items,'occur_rpt.html', pdf.replace('.PDF', ''))
     
     return getOccurItems('0')
+
+@app.route("/occur/accept", methods=[ "POST"])
+@login_required
+def occur_accept():
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    
+    user_type =  request.form['user_type']
+    rpt_id = request.form['rpt_id']
+    user_id = request.form['user_id']
+    sql = """ UPDATE [RPT_OCCUR]
+        SET  """ + user_type + """ = GETDATE()
+        WHERE ID =  """ + rpt_id
+    
+    cur.execute(sql)
+    conn.commit()
+    session['accept'] = 'none'
+    dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + rpt_id + ", for accept")
+    
+    return redirect(url_for('admin_signoff'))
+
+@app.route("/occur/signoff/user/<user_data>", methods=[ "GET"])
+@login_required
+def occur_signoff_user(user_data):
+    page_title = "Sign Off Login"
+    errors = None
+    vals = user_data.split("_")
+    rpt_id = vals[0]
+    user_id = vals[1]
+    typ  = vals[2]
+    return render_template('login_signoff.html', errors=errors, 
+            page_title=page_title, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ)
+
+@app.route("/occur/signoff/login", methods=[ "POST"])
+@login_required
+def occur_signoff_login():
+    username = request.form['txtUsername']
+    password = request.form['txtPassword']
+    user_data = request.form['user_data']
+    vals = user_data.split("_")
+    rpt_id = vals[0]
+    user_id = vals[1]
+    typ  = vals[2]
+    
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    sql = dbs.get_users_username
+    cur.execute(sql, username)
+    
+    rows = cur.fetchall()
+    if len(rows) <= 0:
+        errors = "Invalid Username or Password"
+        return render_template('login_signoff.html', errors=errors, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ)
+    
+    u = {}
+    for row in rows:
+        u['password'] = row.PASSWORD
+        u['username'] = row.USERNAME
+        u['role'] = row.ROLE_NAME
+        u['initials'] = row.INITIALS
+        u['userid'] = row.ID
+        
+        print(user_id, row.ID)
+    if user_id.strip() != str(row.ID):
+        errors = "User does not match the id for sign off document"
+        return render_template('login_signoff.html', errors=errors,user_data=user_data,
+                rpt_id=rpt_id,user_id=user_id, typ=typ)
+    
+    session['accept'] = user_id
+    dbs.add_activity('LOGIN_A ',session['userid'], 'ID:' + rpt_id + ', for accept')
+    
+    return redirect('/occur/signoff/' + user_data)
+    
+
+@app.route("/occur/signoff/<rpt_id>", methods=[ "GET"])
+@login_required
+def occur_sign(rpt_id):
+    page_title = "Sign Off Form"
+    vals = rpt_id.split("_")
+    rpt_id = vals[0]
+    user_id = vals[1]
+    typ  = vals[2]
+    
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    sql = dbs.get_signoff_users(' AND RPT_OCCUR.ID=' + rpt_id)
+    cur.execute(sql)
+    rows = cur.fetchall()
+    
+    report = []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['dateReport'] = row.DISCOVER_DATE
+        d['dateOccur'] = row.OCCUR_DATE
+        d['facCode'] = row.FACILITY_CODE
+        d['facName'] = row.DNAME
+        d['patient'] = row.PATIENT_NAME
+        d['phone'] = row.PHONE
+        d['perCompName'] = row.PER_COMP
+        d['dept'] = row.DEPT
+        d['perRpt'] = row.PERSON_REPORTING
+        d['reason'] = row.REASON
+        d['techName'] = row.TECH
+        d['rphName'] = row.RPH
+        d['explanation'] = row.EXPLANATION
+        d['logo'] = '../../static/images/ihs-pharmacy-logo.png'
+        d['mmg'] =  ''
+        report.append(d)
+        
+    return render_template('occur_rpt.html', page_title = page_title, report=report, user_id=user_id, typ=typ, rpt_id=rpt_id)
 
 def retOccur(cur, rpt_ts, report_items):
     sql = """SELECT ID FROM RPT_OCCUR WHERE TIMESTAMP = ?"""
@@ -336,14 +447,16 @@ def updateStatus():
     
     cur.execute(sql)
     conn.commit()
+    dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + rpt_id + ', for  void(' + status + ')')
 
     return msg
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
     errors=None
+    page_title = "Sign Off Login"
     if request.method == 'GET':
-        return render_template('login.html', errors=errors)
+        return render_template('login.html', errors=errors, page_title=page_title )
     
     username = request.form['username']
     page_title = "Login"
@@ -372,13 +485,45 @@ def login():
         session['role'] = u['role']
         session['initials'] = str.strip(u['initials'])
         session['userid'] = u['userid']
+        session['accept'] = 'none'
+        dbs.add_activity('LOGIN',u['userid'], 'Main login' )
         login_user(user)
 
         return redirect(url_for('index'))
     else:
         errors = "Invalid Username or Password"
         return render_template('login.html', errors=errors, page_title = page_title) 
+
+
+@app.route('/admin/signoff',  methods=["GET"])
+@login_required
+def admin_signoff():
+    if session['role'] != 'Administrator':
+        return redirect(url_for('occur'))
+    page_title = "Occurrence Sign Off"
     
+    conn = pyodbc.connect(RX_CONNECTION_STRING)
+    cur = conn.cursor()
+    sql = dbs.get_signoff_users('') 
+    cur.execute(sql)
+    rows = cur.fetchall()
+    
+    signoff= []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['rph_name'] = row.RPH_NAME
+        d['rph_id_sign'] = row.RPH_ID_SIGN
+        d['tech_name'] = row.TECH_NAME
+        d['tech_id_sign'] = row.TECH_ID_SIGN
+        d['discover_date'] = row.DISCOVER_DATE
+        d['person_reporting'] = row.PERSON_REPORTING
+        d['occur_date'] = row.OCCUR_DATE
+        d['dept'] = row.DEPT
+        d['reason'] = row.REASON
+        d['rpt_id'] = row.ID
+        signoff.append(d)
+    
+    return render_template('admin/signoff.html',  page_title = page_title, signoff=signoff,) 
     
 @app.route("/admin/email", methods=["GET", "POST"])
 @login_required
@@ -398,6 +543,7 @@ def admin_email():
             print(sql)
             cur.execute(sql, params)
             conn.commit()
+            dbs.add_activity('EMAIL ',session['userid'], 'Occurrence group update' )
     
     sql = dbs.get_recipients
     params=(( 'occurrence','email' ))
@@ -439,6 +585,7 @@ def admin_codes():
             # print(params)
             cur.execute(sql, params)
             conn.commit()
+            dbs.add_activity('REASON CODES ',session['userid'], 'Update on RPT_CODES, ID: ' + request.form['code-id'] )
     
     sql = dbs.reason_codes('')
     cur.execute(sql)
@@ -494,6 +641,7 @@ def admin_users():
             params= ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'], generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], int(request.form['active']),session['initials'], int(request.form['user-id']), request.form['txtEmail'] ))  
             cur.execute(sql, params)
             conn.commit()
+            dbs.add_activity('UPDATE ',session['userid'], 'RPT_USERS, ID:' + request.form['user-id'])
         elif request.form['op-code'] == 'delete':			
             cur.execute("DELETE FROM RPT_USERS WHERE ID=?", int(request.form['del_user_id']))
             conn.commit()
@@ -525,7 +673,8 @@ def admin_users():
     return render_template('admin/users.html', users=objects_list, page_title = page_title)
 
 @app.route('/logout')
-def logout():	
+def logout():
+    dbs.add_activity('LOGOUT',session['userid'], 'Main logout' )
     logout_user()
     return redirect(url_for('login'))
 

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{url_for('static', filename='images/favicon-32x32.png')}}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="{{url_for('static', filename='css/site.css')}}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <title>{{ page_title }}</title>
+</head>
+<body>
+    <div class="container">
+    <div class="row"></div>
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <a href="#" class="navbar-brand">
+            <img src="{{url_for('static', filename='images/ihs-pharmacy-logo.png')}}" height="28" id="navLogo" alt="Occurrence Report">
+            Reporting
+        </a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav mr-auto">
+                <a href="{{url_for('index')}}" class="nav-item nav-link active" id="navOccur">Occurrence</a>
+            </div>
+        </div>
+    </nav>
+    <br />
+    <h2>Occurrence Sign Off</h2>
+    <table class="table"  id="tblCodes">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Tech</th>
+                <th scope="col">RPH</th>
+                <th scope="col">Reported</th>
+                <th scope="col">Reported By</th>
+                <th scope="col">Occured</th>
+                <th scope="col" >Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+  {% for s in signoff %}
+        <tr>
+            <td >
+                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['tech_id_sign'] }}_T">{{s['tech_name'] }}</a>		
+            </td>
+            <td>
+                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['rph_id_sign'] }}_R">{{s['rph_name'] }}</a>
+            </td>
+            <td>
+                    {{ s['discover_date'] }}
+            </td>
+            <td class="">
+                    {{ s['person_reporting'] }}
+            </td>
+            <td>
+                    {{ s['occur_date'] }}
+            </td>
+            <td>
+                    {{ s['dept'] }} - {{ s['reason'] }} 
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+<!-- Accept MODAL -->
+<div class="modal fade" id="mLogin" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-info">
+          <h5 class="modal-title" style="color:#ffffff">Accept Occurrence Report</h5>
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form method="POST"  action="{{url_for('occur_signoff_login')}}">
+            <div class="form-group row">
+                <div class="col-sm-10">
+            <p>By entering my password and logging in, 
+            I am acknowledging that I have read this report and that my electronic signature will appear on the official report.</p>
+            <div class="form-group row">
+                <label for="txtUsername" class="col-sm-2 col-form-label">Username &nbsp;&nbsp;</label>
+                <div class="col-sm-10">
+                    <input type="username" class="form-control" name="txtUsername" id="txtUsername" placeholder="Username">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="txtPassword" class="col-sm-2 col-form-label">Password &nbsp;&nbsp;</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" name="txtPassword" id="txtPassword" placeholder="Password ">
+                </div>
+            </div>
+            <span id="errorText" style="color:red"></span>
+                </div>
+        </div>
+        <div class="modal-footer">
+          <button  class="btn btn-info" id="btnAccCancel" type="submit" >Accept</button>
+          <button type="button" class="btn btn-secondary" id="btnAccCancel" data-dismiss="modal" aria-label="Close">Cancel</button>	
+          <input type="hidden" id="user_data" name="user_data" />
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+        function openLogin(user_data){
+            $("#txtPassword").val("");
+            $("#txtUsername").val("");
+            $("#user_data").val(user_data);
+            console.log(user_data);
+            $("#mLogin").modal();
+        }
+
+        function login() {
+            /*
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('occur_accept') }} ",
+                dataType: 'json',
+                data: {
+                  'rpt_id' : rpt_id,
+                  'user_id' : user_id,
+                  'user_type': user_type 
+                },
+                  success: function (data) {
+                },
+                  complete: function (data) {
+                      
+                }
+              });
+              */
+
+            let url = '/occur/signoff/' + $("#user_data").val();
+            //window.location.href=url;
+            window.open(url, '_blank');
+        }
+  </script>
+</body>
+</html>

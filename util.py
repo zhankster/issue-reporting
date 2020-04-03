@@ -9,7 +9,7 @@ from flask import render_template, make_response
 
 def print_report(report, template, rpt_id):
     rpt_files = []
-    rendered = render_template(template, report=report )
+    rendered = render_template(template, report=report ,  typ=None)
     rendered = rendered.encode()
     rpt_filename = "rpt_" + rpt_id + ".html"
     rpt_files.append("temp/" + rpt_filename)

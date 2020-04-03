@@ -58,3 +58,12 @@ h5{
 .error{
     color:#ff0000;
 }
+
+.btn-wide {
+    width: 120px !important;
+}
+
+.cursor-pointer{cursor: pointer;}
+.cursor-croshair{cursor: crosshair;}
+.cursor-eresize{cursor: e-resize;}
+.cursor-move{cursor: move;}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <link rel="icon" type="image/png" sizes="32x32" href="{{url_for('static', filename='images/favicon-32x32.png')}}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="{{url_for('static', filename='css/site.css')}}">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    
+    <title>{{ page_title }}</title>
+<br/>
+<br/>
+<div class="container">
+  <div class="row">
+    <div class="col">
+    	<h1 style="color:#254878;">Sign Off Login</h1>
+    	<br/>
+    </div>
+  </div>
+  {% if errors %}
+	<div class="alert alert-danger" role="alert">
+		{{errors}}
+	</div>
+  
+  {% endif %}
+	<div class="row">
+		<div class="col-4">
+			<form method="post" action="{{ url_for('occur_signoff_login') }}">
+					<div class="form-group">
+						<label for="username" style="font-weight:bold;	color:#254878;">Username</label>
+						<input type="text" class="form-control" id="txtUsername" name="txtUsername" placeholder="username">
+					</div>
+					<div class="form-group">
+						<label for="password" style="font-weight:bold;color:#254878;">Password</label>
+						<input type="password" class="form-control" id="txtPassword" name="txtPassword" placeholder="password">
+					</div>
+					<button type="submit" class="btn btn-dark">Submit</button>
+					<input type="hidden" id="user_data" name="user_data" value={{ user_data }} />
+					<input type="hidden" id="rpt_id" name="rpt_id" value={{ rpt_id }} />
+					<input type="hidden" id="user_id" name="user_id" value={{ user_id }} />
+					<input type="hidden" id="typ" name="typ" value={{ typ }} />
+			</form>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-8">
+			<br />
+			<h4>By entering my password, 
+				I am acknowledging that I have read this report and that my electronic signature will appear on the official report. </h4>
+		</div>
+	</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="{{url_for('static', filename='js/util.js')}}"></script>
+</body>
+</html>

@@ -186,7 +186,7 @@
             <select type="text"  class="form-control form-control-sm setReq" alt="Tech" id="selTechInv" name="selTechInv">
                 <option value="0"></option>
                 {%- for u in users -%}
-                    {% if 'Tech' in u['position'] -%}
+                    {% if 'Tech' in u['position'] or  'RPH' in u['position']-%}
                         <option value="{{ u.id }}">{{ u.firstname }} {{ u.lastname }}</option>
                     {% endif %}
                 {%- endfor -%}
@@ -223,17 +223,17 @@
             <br /> 
             <div class='float-right'>
                 <!-- <button type="button" class="btn btn-secondary rounded btn-sm btn-form" onclick="clearForm()">Clear Form</button> -->
-                <a href="/" class="btn btn-secondary rounded btn-sm btn-form">Clear Form</a>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <button type="button" onclick="validateForm()"  class="btn btn-primary btn-sm rounded btn-form">Submit</button>
+                <a href="/" class="btn btn-secondary rounded btn-sm btn-form btn-wide">Clear Form</a>
+                <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+                <button type="button" onclick="validateForm()"  class="btn btn-primary btn-sm rounded btn-form btn-wide">Submit</button>
                 &nbsp;
             </div>
             <br /><br />
             </form>
             <div class="float-right" id="dVoid" style="display:none">
                 <form action="/upload" id="frmUpload" method="POST">
-                <button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-warning rounded btn-sm btn-form">Void Current</button>&nbsp;
-                    <input  type="submit" id="btnAttach" class="btn btn-primary rounded btn-sm btn-form" value="Add Attachment" />&nbsp;
+                <button type="button" onclick="voidForm()" id="btnVoid" class="btn btn-warning rounded btn-sm btn-form btn-wide">Void Current</button>&nbsp;
+                    <input  type="submit" id="btnAttach" class="btn btn-primary rounded btn-sm btn-form btn-wide" value="Add Attachment" />&nbsp;
                     <input type="hidden" name="attFile" id="attFile"value="null" />
                     <input type="hidden" id="attFac" name="attFac" />
                     <input type="hidden" id="attID" name="attID" />
@@ -476,7 +476,6 @@
 
         let msg = "";
         let type_count = 0;
-        console.log('selPerComp: ' + selPerComp);
 
         if(dateReport.trim() === "") {
             msg += "A date for discovery or reporting is required<br />";
@@ -484,7 +483,7 @@
         if(dateOccur.trim() === "") {
             msg += "An occurence date is required<br />";
         }
-        if(selPerComp.trim() === "0") {
+        if( !selPerComp || selPerComp.trim() === "0"  ) {
             msg += "A Person completing report must be selected<br />";
         }
 
@@ -801,6 +800,8 @@
                 let id = currCategory.attr('id')
                 currentDept = $("#" + id + "L").text();
                 currentReason =  $("option:selected", currCategory ).text();
+                currentRCode = $("option:selected", currCategory ).val();
+                console.log(currentRCode);
 
                 if (item.VALID == 0) {
                     $('.container').addClass(cls);

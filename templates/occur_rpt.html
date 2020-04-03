@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <title>Occurrence Details</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
   </head>
   <style>
@@ -35,7 +37,11 @@
       }
   </style>
   <body>
+    {% if typ != none %}
     <div class="container">
+    <div class="row>
+    <div class="col-12">
+      {% endif %}
     {%- for r in report -%}
       <table>
         <tr><td width="33%" align="left" ><img src = "{{ r['logo'] }}" /></td> 
@@ -47,7 +53,7 @@
     <table align="center" width="100%" style="font-size:12px">
         <tr><td width="33%">IHS Pharmacy<br />
             504 McCurdy Ave S, STE 7<br />
-             Rainsville, AL 35986</td>
+            Rainsville, AL 35986</td>
             <td width="34%" align="center">&nbsp;</td>
             <td width="33%"><td/> 
     </table>
@@ -112,27 +118,103 @@
       <tr>
         <td colspan="3">{{ r['explanation'] }}</td>
       </tr>
+      {% if typ == none %}
       <tr>
         <th  width="25%">&nbsp;</th>
         <td>&nbsp;</td>
         <th>&nbsp;</th>
         <td>&nbsp;</td>
       </tr>
+      {% endif %}
       <tr>
         <th width="25%">&nbsp;</th>
         <td>&nbsp;</td>
         <th>&nbsp;</th>
         <td>&nbsp;</td>
       </tr>
+      {% if typ == none %}
       <tr>
         <td colspan="4"><strong>PLEASE INITIAL THAT YOU HAVE READ AND UNDERSTAND THIS REPORT.</strong><br />
           If have any questions or would like to make any clarifications, please do so before initialing.
         </td>
       </tr>
+      {% endif %}
     </table>
+    {% if typ == none %}
     <p>&nbsp;&nbsp;Initial:_________________</p>
-    {%- endfor -%}
-    <br />
+    {% endif %}
+   
+  {% if typ != none %}
+    <input type="hidden" id="rpt_id" name="rpt_id"  value="{{ rpt_id }}"/>
+    <input type="hidden" id="user_id" name="user_id"  value="{{ user_id }}"/>
+    <input type="hidden" id="typ" name="typ"  value="{{ typ }}"/>
+    <hr>
+      <button  id="btnSignOff" type="button" class="btn btn-primary" data-toggle="modal" 
+      data-target="#mAccept">Accept</button>
+      &nbsp;&nbsp;
+      <span>
+        {% if  "T" in typ  %}
+        {{  r['techName'] }}  : Techician
+        {% else %}
+        {{  r['rphName'] }}  : Pharmacist
+        {% endif %}
+      </span>
+    </div>
   </div>
+</div>
+{% endif %}
+{%- endfor -%}
+<!-- Accept MODAL -->
+<div class="modal fade" id="mAccept" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h5 class="modal-title" style="color:#ffffff">Accept Occurrence Report</h5>
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+		<div class="form-group row">
+			<div class="col-sm-10">
+        <p>By entering my password and logging in, 
+          I am acknowledging that I have read this report and that my electronic signature will appear on the official report.</p>
+			<span id="errorText" style=""></span>
+			</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-info" id="btnAccCancel" data-dismiss="modal" onclick="accept()">Accept</button>
+        <button type="button" class="btn btn-secondary" id="btnAccCancel" data-dismiss="modal" aria-label="Close">Cancel</button>	
+      </div>
+    </div>
+  </div>
+</div>
   </body>
+  <script>
+        let rpt_id = $("#rpt_id").val();
+        let user_id= $("#user_id").val();
+        let  typ= $("#typ").val();
+
+        function accept(){
+          let user_type = typ == 'T' ?  'TECH_VERIFY_DATE' : 'RPH_VERIFY_DATE';
+
+          $.ajax({
+            type: "POST",
+            url: "{{ url_for('occur_accept') }} ",
+            dataType: 'json',
+            data: {
+              'rpt_id' : rpt_id,
+              'user_id' : user_id,
+              'user_type': user_type 
+            },
+              success: function (data) {
+                //window.open('/admin/signoff');
+            },
+              complete: function (data) {
+                  //window.open('/admin/signoff');
+                  window.location.href  =  '/admin/signoff'
+            }
+          });
+        }
+
+  </script>
 </html>
