@@ -45,10 +45,10 @@
   {% for s in signoff %}
         <tr>
             <td >
-                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['tech_id_sign'] }}_T">{{s['tech_name'] }}</a>		
+                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['tech_id_sign'] }}_T_{{s['tech_username'] }}">{{s['tech_name'] }}</a>		
             </td>
             <td>
-                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['rph_id_sign'] }}_R">{{s['rph_name'] }}</a>
+                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['rph_id_sign'] }}_R_{{s['rph_username'] }}">{{s['rph_name'] }}</a>
             </td>
             <td>
                     {{ s['discover_date'] }}
@@ -86,7 +86,7 @@
             <div class="form-group row">
                 <label for="txtUsername" class="col-sm-2 col-form-label">Username &nbsp;&nbsp;</label>
                 <div class="col-sm-10">
-                    <input type="username" class="form-control" name="txtUsername" id="txtUsername" placeholder="Username">
+                    <input type="username" class="form-control" name="txtUsername" id="txtUsername" placeholder="Username" >
                 </div>
             </div>
             <div class="form-group row">

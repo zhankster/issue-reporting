@@ -161,6 +161,20 @@
         </div>
     </div>
 <div class="form-group row ">
+    <div class="col-sm-4">
+        <label for="selWsale" id="selWsaleL" class="small">Wholesale</label>
+        <select type="text"  class="form-control form-control-sm selType" id="selWsale" name="selWsale" >
+            <option value="0"></option>
+            {%- for r in reasons -%}
+                {% if 'WSALE' in r['code'] -%}
+                    <option value="{{ r.id }}">{{ r.reason_desc }}</option>
+                {% endif %}
+            {%- endfor -%}
+        </select>
+    </div>
+    <div class="col-md-4">
+        &nbsp;
+    </div>
         <div class="col-sm-4">
             <label for="selOther" id="selOtherL" class="small">Other</label>
             <select type="text"  class="form-control form-control-sm selType" id="selOther" name="selOther" >
@@ -172,12 +186,7 @@
                 {%- endfor -%}
             </select>
         </div>
-        <div class="col-md-4">
-            &nbsp;
         </div>
-        <div class="col-sm-4">
-        </div>
-    </div>
 
 
     <div class="form-group row ">
@@ -460,6 +469,7 @@
         let selDelivery = $('#selDelivery').val();
         let selBilling= $('#selBilling').val();
         let selCooking = $('#selCooking').val();
+        let selWsale = $('#selWsale').val();
         let selOther = $('#selOther').val();
         let selTechInv = $('#selTechInv').val();
         let techName = $("#selTechInv option:selected" ).text().trim();
@@ -534,6 +544,7 @@
                     'selBilling': selBilling,
                     'selCooking': selCooking,
                     'selOther': selOther,
+                    'selWsale' : selWsale,
                     'selTechInv': selTechInv,
                     'techName': techName,
                     'selRphInv': selRphInv,
@@ -690,6 +701,7 @@
                 ,[DELIVERY]
                 ,[BILLING]
                 ,[COOKING]
+                ,[WHOLESALE]
                 ,[OTHER]
                 ,[TECH_ID]
                 ,[RPH_ID]
@@ -731,6 +743,7 @@
                 $('#selDelivery').val("0");
                 $('#selBilling').val("0");
                 $('#selCooking').val("0");
+                $('#selWsale').val("0");
                 $('#selOther').val("0");
                 $('#selTechInv').val(item.TECH_ID);
                 $('#selRphInv').val(item.RPH_ID);
@@ -786,6 +799,11 @@
                     case 'COOK':
                         $('#selCooking').val(item.REASON_CODE); 
                         currCategory = $('#selCooking');
+                        currentDept = 'Med Card';
+                        break;
+                    case 'WSALE':
+                        $('#selWsale').val(item.REASON_CODE); 
+                        currCategory = $('#selWsale');
                         currentDept = 'Med Card';
                         break;
                     case 'OU':
@@ -863,6 +881,7 @@
         $('#selDelivery').val("0");
         $('#selBilling').val("0");
         $('#selCooking').val("0");
+        $('#selWsale').val("0"); 
         $('#selOther').val("0");
         $('#selTechInv').val("0");
         $('#selRphInv').val("0");

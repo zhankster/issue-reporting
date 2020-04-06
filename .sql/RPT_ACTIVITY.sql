@@ -1,3 +1,5 @@
+DROP Table
+
 USE [RXBackend]
 GO
 
@@ -23,6 +25,21 @@ CREATE TABLE [dbo].[RPT_ACTIVITY](
 ALTER TABLE [dbo].[RPT_ACTIVITY] ADD  CONSTRAINT [DF_RPT_ACTIVITY_CREATED]  DEFAULT (getdate()) FOR [CREATED]
 GO
 
+select * from [dbo].[RPT_ACTIVITY]
+update RPT_OCCUR set RPH_VERIFY_DATE = null, TECH_VERIFY_DATE = null
+select * from RPT_USERS
+
+INSERT INTO [dbo].[RPT_ACTIVITY]
+           ([CREATED]
+           ,[ACTIVITY]
+           ,[USER]
+           ,[DESCRIPTION])
+     VALUES
+           (<CREATED, datetime,>
+           ,<ACTIVITY, varchar(30),>
+           ,<USER, int,>
+           ,<DESCRIPTION, varchar(256),>)
+GO
 
 USE [RXBackend]
 GO

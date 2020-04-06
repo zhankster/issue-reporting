@@ -212,6 +212,7 @@ def occur():
             int(request.form['selDelivery']), 
             int(request.form['selBilling']), 
             int(request.form['selCooking']), 
+            int(request.form['selWsale']),
             int(request.form['selOther']), 
             int(request.form['selTechInv']), 
             int(request.form['selRphInv']), 
@@ -269,6 +270,7 @@ def occur_accept():
     
     return redirect(url_for('admin_signoff'))
 
+# Goes to login for sign off
 @app.route("/occur/signoff/user/<user_data>", methods=[ "GET"])
 @login_required
 def occur_signoff_user(user_data):
@@ -278,8 +280,9 @@ def occur_signoff_user(user_data):
     rpt_id = vals[0]
     user_id = vals[1]
     typ  = vals[2]
+    username = vals[3]
     return render_template('login_signoff.html', errors=errors, 
-            page_title=page_title, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ)
+            page_title=page_title, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ, username=username)
 
 @app.route("/occur/signoff/login", methods=[ "POST"])
 @login_required
@@ -496,7 +499,7 @@ def login():
         errors = "Invalid Username or Password"
         return render_template('login.html', errors=errors, page_title = page_title) 
 
-
+# Displays list of users who need to sign off
 @app.route('/admin/signoff',  methods=["GET"])
 @login_required
 def admin_signoff():
@@ -507,6 +510,7 @@ def admin_signoff():
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
     sql = dbs.get_signoff_users('') 
+    print(sql)
     cur.execute(sql)
     rows = cur.fetchall()
     
@@ -514,8 +518,10 @@ def admin_signoff():
     for row in rows:
         d = collections.OrderedDict()
         d['rph_name'] = row.RPH_NAME
+        d['rph_username'] = row.RPH_USERNAME
         d['rph_id_sign'] = row.RPH_ID_SIGN
         d['tech_name'] = row.TECH_NAME
+        d['tech_username'] = row.TECH_USERNAME
         d['tech_id_sign'] = row.TECH_ID_SIGN
         d['discover_date'] = row.DISCOVER_DATE
         d['person_reporting'] = row.PERSON_REPORTING

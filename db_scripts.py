@@ -49,7 +49,9 @@ def get_signoff_users(filter):
 		THEN  RPH_ID
 	ELSE 0 END AS RPH_ID_SIGN,
     RPT_USERS_TECH.FIRST_NAME + ' ' + RPT_USERS_TECH.LAST_NAME TECH,
+    RPT_USERS_TECH.USERNAME  TECH_USERNAME,
     RPT_USERS_RPH.FIRST_NAME + ' ' + RPT_USERS_RPH.LAST_NAME RPH,
+    RPT_USERS_RPH.USERNAME RPH_USERNAME,
     RPT_USERS_COMP.FIRST_NAME + ' ' + RPT_USERS_COMP.LAST_NAME PER_COMP,
 	RPT_OCCUR.FACILITY_CODE, 
 	RPT_OCCUR.PATIENT_NAME,  
@@ -198,6 +200,7 @@ update_occurence = """ UPDATE [dbo].[RPT_OCCUR]
         ,[DELIVERY] = ?
         ,[BILLING] =  ?
         ,[COOKING] = ?
+        ,[WHOLESALE] = ?
         ,[OTHER] =  ?
         ,[TECH_ID] =  ?
         ,[RPH_ID] =  ?
