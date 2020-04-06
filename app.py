@@ -286,6 +286,7 @@ def occur_signoff_user(user_data):
 def occur_signoff_login():
     username = request.form['txtUsername']
     password = request.form['txtPassword']
+    accept_login = session['accept']
     user_data = request.form['user_data']
     vals = user_data.split("_")
     rpt_id = vals[0]
@@ -326,6 +327,7 @@ def occur_signoff_login():
 @login_required
 def occur_sign(rpt_id):
     page_title = "Sign Off Form"
+    accept_login = session['accept']
     vals = rpt_id.split("_")
     rpt_id = vals[0]
     user_id = vals[1]
@@ -357,7 +359,7 @@ def occur_sign(rpt_id):
         d['mmg'] =  ''
         report.append(d)
         
-    return render_template('occur_rpt.html', page_title = page_title, report=report, user_id=user_id, typ=typ, rpt_id=rpt_id)
+    return render_template('occur_rpt.html', page_title = page_title, report=report, user_id=user_id, typ=typ, rpt_id=rpt_id, accept_login=accept_login)
 
 def retOccur(cur, rpt_ts, report_items):
     sql = """SELECT ID FROM RPT_OCCUR WHERE TIMESTAMP = ?"""

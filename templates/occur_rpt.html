@@ -148,6 +148,7 @@
     <input type="hidden" id="rpt_id" name="rpt_id"  value="{{ rpt_id }}"/>
     <input type="hidden" id="user_id" name="user_id"  value="{{ user_id }}"/>
     <input type="hidden" id="typ" name="typ"  value="{{ typ }}"/>
+    <input type="hidden" id="accept_login" name="accept_login"  value="{{  accept_login }}"/>
     <hr>
       <button  id="btnSignOff" type="button" class="btn btn-primary" data-toggle="modal" 
       data-target="#mAccept">Accept</button>
@@ -193,9 +194,17 @@
         let rpt_id = $("#rpt_id").val();
         let user_id= $("#user_id").val();
         let  typ= $("#typ").val();
+        let accept_login= $("#accept_login").val();
+        console.log(user_id, accept_login);
 
         function accept(){
           let user_type = typ == 'T' ?  'TECH_VERIFY_DATE' : 'RPH_VERIFY_DATE';
+          console.log(user_id, accept_login);
+          if (accept_login !=  user_id  ) {
+              alert("The user is not logged to accept the report");
+              return false;
+
+          }
 
           $.ajax({
             type: "POST",
