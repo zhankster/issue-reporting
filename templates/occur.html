@@ -206,6 +206,8 @@
             <br />
             <label for="cbTechReq" class="small">Require Signature</label>
             <input type="checkbox" id="cbTechReq"  name="cbTechReq" />
+            <br />
+            <span id="sTechSign" class="font-weight-bold"></span>
         </div>
         <div class="col-md-2">
             &nbsp;
@@ -225,6 +227,8 @@
         <br />
         <label for="cbRphReq" class="small">Require Signature</label>
         <input type="checkbox" id="cbRphReq"  name="cbRphReq" />
+        <br />
+        <span id="sRphSign" class="font-weight-bold"></span>
     </div>
 </div>
     <div class="form-group row">
@@ -493,6 +497,11 @@
         if(dateOccur.trim() === "") {
             msg += "An occurence date is required<br />";
         }
+
+        if(!dateCompare(dateReport.trim(), dateOccur.trim())) {
+            msg += "The reported date must be later than or equal to the occurrence date<br />";
+        }
+
         if( !selPerComp || selPerComp.trim() === "0"  ) {
             msg += "A Person completing report must be selected<br />";
         }
@@ -679,6 +688,8 @@
 
     function edit_occurence(id, facName){
         let cls = 'fActive';
+        let sColor = '#6df514';
+        let sText = 'Signature Obtained';
         let currCategory = null;
         $.ajax({
             data: {
@@ -708,6 +719,10 @@
                 ,[EXPLANATION]
                 ,[VALID]
                 ,[REASON_CODE]
+                ,[TECH_VERIFY_DATE]
+                ,[RPH_VERIFY_DATE]
+                ,CASE WHEN [TECH_VERIFY_DATE] is null THEN 0 ELSE 1 END TECH_VERIFY
+                ,CASE WHEN [RPH_VERIFY_DATE] is null THEN 0 ELSE 1 END RPH_VERIFY
                 ,c.CATEGORY_CODE
                 ,r.ATTACHMENT
                 ,r.UPLOAD
@@ -762,6 +777,21 @@
                 $("#aUpload").attr('rel', item.UPLOAD);
                 let stat_t = item.TECH_REQ_VERIFY == "1" ? true : false;
                 let stat_r = item.RPH_REQ_VERIFY == "1" ? true : false;
+                if (stat_t  && item.TECH_VERIFY == 1){
+                    $('#selTechInv').css("background-color", sColor);
+                    $("#sTechSign").html(sText);
+                }else{
+                    $('#selTechInv').css("background-color","#FFFFFF");
+                    $("#sTechSign").html('');
+                }
+                if (stat_r  && item.RPH_VERIFY == 1){
+                    $('#selRphInv').css("background-color", sColor);
+                    $("#sRphSign").html(sText);
+                }else {
+                    $('#selRphInv').css("background-color", "#FFFFFF");
+                    $("#sRphSign").html("");
+                }
+
                 $('#cbTechReq').prop('checked', stat_t);
                 $('#cbRphReq').prop('checked', stat_r);
                 if (item.UPLOAD.trim() === ''){

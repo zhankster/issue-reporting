@@ -18,6 +18,35 @@ config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 import db_scripts as dbs
 import util as pr
 
+import logging
+from logging.config import dictConfig
+from logging.handlers import RotatingFileHandler
+# logger = logging.getLogger('werkzeug')
+# handler = logging.FileHandler('log/demo.log')
+# logger.addHandler(handler)
+# logging.basicConfig(filename='log/info.log',
+# level=logging.INFO,
+# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
+# logging.basicConfig(filename='log/error.log',
+# level=logging.ERROR,
+# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
 # GLOBALS
 RX_CONNECTION_STRING='DRIVER={SQL Server};SERVER=localhost;DATABASE=RXBackend;Trusted_Connection=yes'
 CIPS_CONNECTION_STRING='DRIVER={SQL Server};SERVER=localhost;DATABASE=CIPS;Trusted_Connection=yes'
@@ -194,7 +223,7 @@ def occur():
         elif request.form['op-code'] == 'delete':
             cur.execute("DELETE FROM dbo.RPT_REASONS WHERE ID=?", request.form['del_code'])
             conn.commit()
-        elif request.form['op-code'] == 'update':
+        elif request.form['op-code'] == 'update':  #bbbb
             sql = dbs.update_occurence
             pdf = request.form['pdf']
             params=((int(session['userid']), 
@@ -492,6 +521,7 @@ def login():
         session['userid'] = u['userid']
         session['accept'] = 'none'
         dbs.add_activity('LOGIN',u['userid'], 'Main login' )
+        app.logger.info('%s logged in successfully', user.id)
         login_user(user)
 
         return redirect(url_for('index'))
@@ -739,7 +769,17 @@ def request_loader(request):
 
 
 if __name__ == "__main__":
+    handler = RotatingFileHandler('log/info.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.INFO) 
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
     app.run(debug=True)
     
 # if __name__ == "__main__":
+#     handler = RotatingFileHandler('log/info.log', maxBytes=10000, backupCount=1)
+#     handler.setLevel(logging.INFO) 
+#     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+#     handler.setFormatter(formatter)
+#     app.logger.addHandler(handler)
 #     app.run(host= '0.0.0.0')

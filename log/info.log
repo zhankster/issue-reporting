@@ -1,0 +1,51 @@
+2020-04-07 08:30:29,120 - app - INFO - hanka logged in successfully
+2020-04-07 08:30:29,121 - app - ERROR - Error
+2020-04-07 08:35:09,653 - app - INFO - hanka logged in successfully
+2020-04-07 08:35:09,653 - app - ERROR - Error
+2020-04-07 08:36:44,639 - app - INFO - hanka logged in successfully
+2020-04-07 08:36:44,639 - app - ERROR - Error
+2020-04-07 08:43:45,507 - app - INFO - hanka logged in successfully
+2020-04-07 08:43:45,508 - app - ERROR - Error
+2020-04-07 09:29:37,167 - app - ERROR - Exception on /occur/ [GET]
+Traceback (most recent call last):
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 2446, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1951, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1820, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Program Files\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1949, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1935, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Program Files\Python38\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "app.py", line 140, in occur_get
+    return getOccurItems(rpt_id)
+  File "app.py", line 417, in getOccurItems
+    cur.execute(sql)
+pyodbc.ProgrammingError: ('42S22', "[42S22] [Microsoft][ODBC SQL Server Driver][SQL Server]Invalid column name 'CATEGORY_COD'. (207) (SQLExecDirectW)")
+2020-04-07 09:30:12,961 - app - ERROR - Exception on /occur/ [GET]
+Traceback (most recent call last):
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 2446, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1951, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1820, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Program Files\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1949, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Program Files\Python38\lib\site-packages\flask\app.py", line 1935, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Program Files\Python38\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "app.py", line 140, in occur_get
+    return getOccurItems(rpt_id)
+  File "app.py", line 417, in getOccurItems
+    cur.execute(sql)
+pyodbc.ProgrammingError: ('42S22', "[42S22] [Microsoft][ODBC SQL Server Driver][SQL Server]Invalid column name 'CATEGORY_COD'. (207) (SQLExecDirectW)")
+2020-04-07 09:32:20,368 - app - INFO - hanka logged in successfully

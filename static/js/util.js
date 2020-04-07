@@ -43,3 +43,7 @@ function changeDateFormat(inputDate){  // expects Y-m-d
     return month + '/' + day + '/' + year;
 }
 
+function dateCompare(dtmfrom, dtmto){
+    return new Date(dtmfrom).getTime() >=  new Date(dtmto).getTime() ;
+ }
+
