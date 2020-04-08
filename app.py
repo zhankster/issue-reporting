@@ -117,7 +117,7 @@ def upload():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 flash('File successfully uploaded')
-                dbs.add_activity('UPLOAD ',session['userid'], 'RPT_OCCUR, ID:' + id_rpt )
+                dbs.add_activity('UPLOAD ',session['userid'], filename, 'RPT_OCCUR', '0', id_rpt )
                 # return redirect(url_for('upload'))
                 # return redirect('/upload')
                 return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
@@ -273,12 +273,13 @@ def occur():
             # print(params)
             cur.execute(sql, params)
             conn.commit()
-            dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + request.form['id'])
+            dbs.add_activity('UPDATE ',session['userid'], 'Report', 'RPT_OCCUR','0', request.form['id'])
             
             pr.print_report(report_items,'occur_rpt.html', pdf.replace('.PDF', ''))
     
     return getOccurItems('0')
 
+# Accept report
 @app.route("/occur/accept", methods=[ "POST"])
 @login_required
 def occur_accept():
@@ -288,14 +289,16 @@ def occur_accept():
     user_type =  request.form['user_type']
     rpt_id = request.form['rpt_id']
     user_id = request.form['user_id']
+    witness_type = request.form['witness_type']
     sql = """ UPDATE [RPT_OCCUR]
-        SET  """ + user_type + """ = GETDATE()
+        SET  """ + user_type + """ = GETDATE(),
+        """ + witness_type + """ =""" + str(session['userid'] ) + """ 
         WHERE ID =  """ + rpt_id
     
     cur.execute(sql)
     conn.commit()
     session['accept'] = 'none'
-    dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + rpt_id + ", for accept")
+    dbs.add_activity('ACCEPT ',session['userid'], 'Accept Occurrence report' , 'RPT_OCCUR', user_id, rpt_id )
     
     return redirect(url_for('admin_signoff'))
 
@@ -311,8 +314,9 @@ def occur_signoff_user(user_data):
     typ  = vals[2]
     username = vals[3]
     return render_template('login_signoff.html', errors=errors, 
-            page_title=page_title, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ, username=username)
+            page_title=page_title, user_data=user_data,rpt_id=rpt_id,user_id=user_id, typ=typ, username=username,)
 
+# Login for report to accept
 @app.route("/occur/signoff/login", methods=[ "POST"])
 @login_required
 def occur_signoff_login():
@@ -343,18 +347,18 @@ def occur_signoff_login():
         u['initials'] = row.INITIALS
         u['userid'] = row.ID
         
-        print(user_id, row.ID)
+        # print(user_id, row.ID)
     if user_id.strip() != str(row.ID):
         errors = "User does not match the id for sign off document"
         return render_template('login_signoff.html', errors=errors,user_data=user_data,
                 rpt_id=rpt_id,user_id=user_id, typ=typ)
     
     session['accept'] = user_id
-    dbs.add_activity('LOGIN_A ',session['userid'], 'ID:' + rpt_id + ', for accept')
+    dbs.add_activity('LOGIN_A ',session['userid'], 'Login for report accept', 'RPT_OCCUR', user_id , rpt_id)
     
     return redirect('/occur/signoff/' + user_data)
     
-
+# Goes to report to accept
 @app.route("/occur/signoff/<rpt_id>", methods=[ "GET"])
 @login_required
 def occur_sign(rpt_id):
@@ -396,7 +400,7 @@ def occur_sign(rpt_id):
 def retOccur(cur, rpt_ts, report_items):
     sql = """SELECT ID FROM RPT_OCCUR WHERE TIMESTAMP = ?"""
     params=(( rpt_ts ))
-    print(sql, params)
+    # print(sql, params)
     cur.execute(sql, params)
     row = cur.fetchone()
     id_rpt = str(row[0])
@@ -481,7 +485,7 @@ def updateStatus():
     
     cur.execute(sql)
     conn.commit()
-    dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + rpt_id + ', for  void(' + status + ')')
+    dbs.add_activity('UPDATE ',session['userid'], 'RPT_OCCUR, ID:' + rpt_id + ', for  void(' + status + ')', '', '0', '0')
 
     return msg
 
@@ -520,7 +524,7 @@ def login():
         session['initials'] = str.strip(u['initials'])
         session['userid'] = u['userid']
         session['accept'] = 'none'
-        dbs.add_activity('LOGIN',u['userid'], 'Main login' )
+        dbs.add_activity('LOGIN',u['userid'], 'Main login', '', '0' , '0')
         app.logger.info('%s logged in successfully', user.id)
         login_user(user)
 
@@ -540,7 +544,7 @@ def admin_signoff():
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
     sql = dbs.get_signoff_users('') 
-    print(sql)
+    # print(sql)
     cur.execute(sql)
     rows = cur.fetchall()
     
@@ -561,7 +565,7 @@ def admin_signoff():
         d['rpt_id'] = row.ID
         signoff.append(d)
     
-    return render_template('admin/signoff.html',  page_title = page_title, signoff=signoff,) 
+    return render_template('admin/signoff.html',  page_title = page_title, signoff=signoff, witness=session['userid']) 
     
 @app.route("/admin/email", methods=["GET", "POST"])
 @login_required
@@ -577,11 +581,11 @@ def admin_email():
         if request.form['usage'] == 'email':
             params=(( request.form['recipients'],request.form['target'],request.form['usage'] ))
             sql = dbs.update_groups
-            print(request.form['recipients'],request.form['target'],request.form['usage'])
-            print(sql)
+            # print(request.form['recipients'],request.form['target'],request.form['usage'])
+            # print(sql)
             cur.execute(sql, params)
             conn.commit()
-            dbs.add_activity('EMAIL ',session['userid'], 'Occurrence group update' )
+            dbs.add_activity('EMAIL ',session['userid'], 'Occurrence group update' , '', '0', '0')
     
     sql = dbs.get_recipients
     params=(( 'occurrence','email' ))
@@ -623,7 +627,7 @@ def admin_codes():
             # print(params)
             cur.execute(sql, params)
             conn.commit()
-            dbs.add_activity('REASON CODES ',session['userid'], 'Update on RPT_CODES, ID: ' + request.form['code-id'] )
+            dbs.add_activity('UPDATE',session['userid'], '' , 'RPT_CODES',  '0', request.form['code-id'])
     
     sql = dbs.reason_codes('')
     cur.execute(sql)
@@ -679,7 +683,7 @@ def admin_users():
             params= ((request.form['txtUsername'], request.form['txtFirstname'], request.form['txtLastname'], request.form['selPosition'], generate_password_hash(request.form['txtPassword']), int(request.form['selRole']), request.form['txtInitials'], int(request.form['active']),session['initials'], int(request.form['user-id']), request.form['txtEmail'] ))  
             cur.execute(sql, params)
             conn.commit()
-            dbs.add_activity('UPDATE ',session['userid'], 'RPT_USERS, ID:' + request.form['user-id'])
+            dbs.add_activity('UPDATE', session['userid'],'', 'RPT_USERS',  '0', request.form['user-id'] )
         elif request.form['op-code'] == 'delete':			
             cur.execute("DELETE FROM RPT_USERS WHERE ID=?", int(request.form['del_user_id']))
             conn.commit()
@@ -712,7 +716,7 @@ def admin_users():
 
 @app.route('/logout')
 def logout():
-    dbs.add_activity('LOGOUT',session['userid'], 'Main logout' )
+    dbs.add_activity('LOGOUT',session['userid'], 'Main logout', '', '0', '0' )
     logout_user()
     return redirect(url_for('login'))
 

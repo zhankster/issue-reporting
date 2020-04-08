@@ -61,9 +61,9 @@
     <table width="100%">
       <tr>
         <th width="25%">Date of Occurrence:</th>
-        <td width="25%">{{ r['dateReport'] }}</td>
+        <td width="25%">{{ r['dateOccur'] }}</td>
         <th width="25%">Occurrence Reported:</th>
-        <td>{{ r['dateOccur'] }}</td>
+        <td>{{ r['dateReport'] }}</td>
       </tr>
       <tr>
         <th width="25%">Facility Name:</th>
@@ -199,7 +199,9 @@
 
         function accept(){
           let user_type = typ == 'T' ?  'TECH_VERIFY_DATE' : 'RPH_VERIFY_DATE';
-          console.log(user_id, accept_login);
+          let witness_type = typ == 'T' ?  'TECH_WITNESS' : 'RPH_WITNESS';
+          console.log(user_id, accept_login, witness_type );
+
           if (accept_login !=  user_id  ) {
               alert("The user is not logged to accept the report");
               return false;
@@ -213,7 +215,8 @@
             data: {
               'rpt_id' : rpt_id,
               'user_id' : user_id,
-              'user_type': user_type 
+              'user_type': user_type,
+              'witness_type': witness_type
             },
               success: function (data) {
                 //window.open('/admin/signoff');

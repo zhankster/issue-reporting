@@ -63,6 +63,17 @@ h5{
     width: 120px !important;
 }
 
+.sign{
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.signlink{
+    font-size: 14px;
+    font-weight: bold;
+    color: #0000FF;
+}
+
 .cursor-pointer{cursor: pointer;}
 .cursor-croshair{cursor: crosshair;}
 .cursor-eresize{cursor: e-resize;}

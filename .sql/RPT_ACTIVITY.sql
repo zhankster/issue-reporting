@@ -25,7 +25,9 @@ CREATE TABLE [dbo].[RPT_ACTIVITY](
 ALTER TABLE [dbo].[RPT_ACTIVITY] ADD  CONSTRAINT [DF_RPT_ACTIVITY_CREATED]  DEFAULT (getdate()) FOR [CREATED]
 GO
 
-select * from [dbo].[RPT_ACTIVITY]
+select * from [dbo].[RPT_ACTIVITY] order by CREATED desc
+
+update RPT_ACTIVITY set ALT_USER = '0' where ALT_USER = '' or ALT_USER is null
 update RPT_OCCUR set RPH_VERIFY_DATE = null, TECH_VERIFY_DATE = null
 select * from RPT_USERS
 

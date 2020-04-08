@@ -15,19 +15,20 @@ def get_json(sql):
 
     return items
 
-def add_activity(activity,user, description):
+def add_activity(activity,user, description, item, alt_user, alt_id):
     conn = pyodbc.connect(RX_CONNECTION_STRING)
     cur = conn.cursor()
     sql = """ INSERT INTO [RPT_ACTIVITY]
-        ([ACTIVITY]
-        ,[USER]
-        ,[DESCRIPTION])
-     VALUES
-        (?
-        ,?
-        ,? )"""
+            ([ACTIVITY]
+            ,[USER]
+            ,[DESCRIPTION]
+            ,[ITEM]
+            ,[ALT_USER]
+            ,[ALT_ID])
+        VALUES
+            (?, ? , ?, ?, ?, ?)"""
     
-    params=(( activity, int(user), description ))
+    params=(( activity, int(user), description, item, int(alt_user), int(alt_id) ))
     cur.execute(sql, params)
     conn.commit()
 

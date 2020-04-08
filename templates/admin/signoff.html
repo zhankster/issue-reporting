@@ -30,6 +30,7 @@
     </nav>
     <br />
     <h2>Occurrence Sign Off</h2>
+    <input type="hidden" id="witness" name="witness" value="{{ witness }}" />
     <table class="table"  id="tblCodes">
         <thead class="thead-dark">
             <tr>
@@ -45,10 +46,10 @@
   {% for s in signoff %}
         <tr>
             <td >
-                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['tech_id_sign'] }}_T_{{s['tech_username'] }}">{{s['tech_name'] }}</a>		
+                    <span id='sign_rph' class="cursor-pointer signlink" onclick="login('{{ s['rpt_id'] }}', '{{ s['tech_id_sign'] }}', 'T', '{{s['tech_username'] }}')">{{s['tech_name'] }}</a>		
             </td>
             <td>
-                    <a id='sign_rph' href="/occur/signoff/user/{{ s['rpt_id'] }}_{{ s['rph_id_sign'] }}_R_{{s['rph_username'] }}">{{s['rph_name'] }}</a>
+                    <span id='sign_rph' class="cursor-pointer signlink" onclick = "login( '{{ s['rpt_id'] }}', '{{ s['rph_id_sign'] }}', 'R', '{{s['rph_username'] }}')">{{s['rph_name'] }}</a>
             </td>
             <td>
                     {{ s['discover_date'] }}
@@ -69,11 +70,11 @@
 </div>
 </div>
 <!-- Accept MODAL -->
-<div class="modal fade" id="mLogin" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade " id="mLogin" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-info">
-          <h5 class="modal-title" style="color:#ffffff">Accept Occurrence Report</h5>
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title" style="color:#ffffff">Invalid Login</h5>
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -81,32 +82,20 @@
             <form method="POST"  action="{{url_for('occur_signoff_login')}}">
             <div class="form-group row">
                 <div class="col-sm-10">
-            <p>By entering my password and logging in, 
-            I am acknowledging that I have read this report and that my electronic signature will appear on the official report.</p>
-            <div class="form-group row">
-                <label for="txtUsername" class="col-sm-2 col-form-label">Username &nbsp;&nbsp;</label>
-                <div class="col-sm-10">
-                    <input type="username" class="form-control" name="txtUsername" id="txtUsername" placeholder="Username" >
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="txtPassword" class="col-sm-2 col-form-label">Password &nbsp;&nbsp;</label>
-                <div class="col-sm-10">
-                    <input type="password" class="form-control" name="txtPassword" id="txtPassword" placeholder="Password ">
-                </div>
-            </div>
+                  <p style="color:red"><strong>You cannot be a witness and accept a report</strong></p>
             <span id="errorText" style="color:red"></span>
                 </div>
         </div>
         <div class="modal-footer">
-          <button  class="btn btn-info" id="btnAccCancel" type="submit" >Accept</button>
-          <button type="button" class="btn btn-secondary" id="btnAccCancel" data-dismiss="modal" aria-label="Close">Cancel</button>	
+          <button type="button" class="btn btn-secondary" id="btnAccCancel" data-dismiss="modal" aria-label="Close">Dismiss</button>	
           <input type="hidden" id="user_data" name="user_data" />
         </form>
         </div>
       </div>
     </div>
   </div>
+ 
+
   <script>
         function openLogin(user_data){
             $("#txtPassword").val("");
@@ -116,28 +105,16 @@
             $("#mLogin").modal();
         }
 
-        function login() {
-            /*
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('occur_accept') }} ",
-                dataType: 'json',
-                data: {
-                  'rpt_id' : rpt_id,
-                  'user_id' : user_id,
-                  'user_type': user_type 
-                },
-                  success: function (data) {
-                },
-                  complete: function (data) {
-                      
-                }
-              });
-              */
-
-            let url = '/occur/signoff/' + $("#user_data").val();
-            //window.location.href=url;
-            window.open(url, '_blank');
+        function login(rpt_id, sign_id, user_type, username) {
+            let witness = $("#witness").val().trim();
+            if (witness == sign_id){
+              $("#mLogin").modal();
+                return false;
+            }
+            let url = '/occur/signoff/user/' + rpt_id +'_' + sign_id +'_' +user_type +'_' + username ;
+            console.log(url);
+            window.location.href=url;
+            //window.open(url);
         }
   </script>
 </body>
