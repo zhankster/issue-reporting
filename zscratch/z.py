@@ -1,3 +1,36 @@
+def report_viewer_file(rpt):
+    page_title = "Report Viewer"
+    pdf_file = '/static/export/' + rpt
+    if rpt == 'none' : 
+        pdf_file = 'none'
+    print('PDF:' + pdf_file)
+    # {{url_for('static', filename='rpt/OPP2.pdf')}}
+    return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file  )
+
+# @app.route("/report_viewer/pdf")
+# @login_required
+# def report_viewer_pdf():
+#     page_title = "Report Viewer"
+#     report = request.args['rpt']
+#     pdf_file = '/static/export/' + report
+#     print('PDF:' + pdf_file)
+#     # {{url_for('static', filename='rpt/OPP2.pdf')}}
+#     return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file  )
+        
+    
+    rpt = ' -F ' + reports_path  + 'OP1.rpt'
+    pdf = ' -O '+ export_path + 'OPP2.pdf -E pdf '
+    params = '-A Fac:DJ -A "Date Range:(05-01-2020,05-26-2020)"'
+    print(exe  +  dsnRx + rpt   + pdf   + params )
+    subprocess.Popen(exe  +  dsnRx + rpt   + pdf   + params , shell=True)
+
+    return redirect(url_for('report_viewer_file', pdf_file = pdf_file))
+        return redirect('/occur/signoff/' + user_data)
+    
+    @app.route("/report_viewer/<rpt>", methods=[ "GET"])
+@login_required
+
+
     if rpt_id != '0':
         return getOccurItems(rpt_id)
     else:

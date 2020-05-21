@@ -4,6 +4,7 @@ __pycache__/
 static/pdf/
 temp/
 zscratch/
+*.pdf
 
 
 

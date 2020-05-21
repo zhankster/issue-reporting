@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block body %}
+<script type="text/javascript">
+	var nav = document.getElementById("navViewer");
+	nav.className += " active";
+	nav.style.fontWeight = "bold";
+</script>
+
+<style>
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 850px}
+    
+    /* Set gray background color and 100% height */
+    .sidenav {
+      background-color: #faf7f7;
+      height: 100%;
+    }
+        
+    /* On small screens, set height to 'auto' for the grid */
+    @media screen and (max-width: 767px) {
+      .row.content {height: auto;} 
+    }
+  </style>
+
+<div class="container-fluid">
+  <div class="row content">
+    <div class="col-sm-3 sidenav ">
+      <h3>Reports</h3>
+      <ul class="">
+        <!-- showParams(filename,name, dsn, dateRange, facility, user, userType, sigReq) -->
+        <li ><a href="#" 
+          onclick="showParams('OP1', 'Occurrences by User', 'Rx', true, true, false, false, false)">
+          Rpt1</a>
+        </li>
+        <li><a href="#"
+          onclick="showParams('Test2.rpt', 'Test Report2', 'Rx', false, true, false, true, true)">
+          Rpt2</a>
+        </li>
+        <li>
+            <a href="#" 
+            onclick="showParams('Test3.rpt', 'Test Report4', 'Rx', true, false, true, false, false)">
+            Rpt3</a>
+        </li>
+      </ul><br>
+    </div>
+    <br>
+    <input type="hidden" id='iPDF' value="{{ pdf_file }}"/>
+      <div class="row">
+        <div class="col-sm-9">
+          <div class="well" id='dReport'>
+            <!-- width="750px" height="750px" -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <!-- Search Modal -->
+        <div class="modal" id="mParam">
+          <div class="modal-dialog  modal-lg">
+              <div class="modal-content">
+  
+              <!-- Modal Header -->
+              <div class="modal-header">
+                  <h4 class="modal-title" id="hSearch"><strong>Report Parameters</strong></h4>
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+  
+              <!-- Modal body -->
+              <div class="modal-body">
+                  <form id="frmSearch" name="frmSearch">
+                      <div class="form-group">
+                          <div class="form-group row" id="pDateRange" style="display: none">
+                                  <div class="col-sm-3">
+                                      <label for="txtDateStart" class="col-form-label">Start Date</label>
+                                      <input type="date" class="form-control" id="txtDateStart" name="txtDateStart">
+                                  </div>
+                                  <div class="col-sm-3">
+                                      <label for="txtDateEnd" class="col-form-label">End Date</label>
+                                      <input type="date" class="form-control" id="txtDateEnd" name="txtDateEnd">
+                                  </div>
+                          </div>
+                          <div class="form-group row" id="pFacility" style="display: none">
+                                <div class="col-sm-2">
+                                  <label for="selFacility" class="col-form-label">Facility</label>
+                                  <select type="text" class="form-control" id="selFacility" name="selFacility" onchange="get_fac_name_s()">
+                                      <option value=""></option>
+                                      <option value="Dekalb County">DJ</option>
+                                  <option value='MJ'>MJ</option>
+                                      {% for f in facilities %}
+                                          <option value="{{ f.name }}">{{ f.code }}</option>
+                                      {% endfor %}
+                                  </select>
+                              </div>
+                              <div class="col-sm-4">
+                                  <label for="txtFacSearch" class="col-form-label">&nbsp;</label>
+                                  <input type="text" class="form-control" readonly style="background-color: #fdfdff" id="txtFacSearch" name="txtFacSearch">
+                              </div>
+                          </div>
+                          <div class="form-group row" id="pUser" style="display: none">
+                                <div class="col-sm-2">
+                                  <label for="txtUser" class="col-form-label">User</label>
+                                  <input type="text" id="txtUser" />
+                              </div>
+                          </div>
+                          <div class="form-group row" id="pPosition">
+                            <div class="col-sm-3" id="pPos" style="display: none">
+                              <label for="selPosition" class="col-form-label">User Type</label>
+                              <select type="text" class="form-control" id="selPosition" name="selPosition" >
+                                    <option value=""></option>
+                                    <option value="Tech">Tech</option>
+                                    <option value="RPH">RPH</option>
+                            </select>
+                          </div>
+                          <div class="col-sm-3" id="pSig" style="display: none">
+                            <label for="selSignature" class="col-form-label">Signature Required</label>
+                            <select type="text" class="form-control" id="selSignature" name="selSignature" >
+                                  <option value="False">False</option>
+                                  <option value="True">True</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <p id="errMsg" style="font-weight: bold; color:red"></p>
+                    <input type="hidden" id='iFile' />
+              </form>
+              <!-- Modal footer -->
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-primary mr-auto" onclick="run_report()">Run</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+  
+              </div>
+          </div>
+      </div>
+<script type="text/javascript">
+  $(function(){
+      pdf = $('#iPDF').val();
+      loadReport(pdf);
+      console.log(pdf);
+  });
+
+  function Report(filename,name, dsn, dateRange, facility, user, userType, sigReq){
+      this.filename = filename;
+      this.name = name;
+      this.dsn = dsn;
+      this.dateRange = dateRange;
+      this.facility = facility;
+      this.user = user;
+      this.userType = userType;
+      this.sigReq = sigReq;
+  }
+
+function loadReport(report){
+      data = ` <object data="/static/export/` + report + `" type="application/pdf" width="800px" height="850px">
+        <embed src="/static/export/` + report + `" type="application/pdf">
+            <p>This browser does not support PDFs</p>
+        </embed>
+    </object>`;
+    if (report == 'none' || report.trim() == ''){
+        data='';
+    }
+    $('#dReport').html(data);
+}
+
+function showParams(filename,name, dsn, dateRange, facility, user, userType, sigReq){
+  clear_params();
+  $('#hSearch').text('Report Parameters: ' + name);
+  dateRange ? $("#pDateRange").show() : $("#pDateRange").hide();
+  facility ? $("#pFacility").show() : $("#pFacility").hide();
+  user ? $("#pUser").show() : $("#pUser").hide();
+  userType ? $("#pPos").show() : $("#pPos").hide();
+  sigReq ? $("#pSig").show() : $("#pSig").hide();
+  $('#iFile').val(filename + ';' + dsn);
+  $('#mParam').modal('show');
+
+}
+
+function run_report(){
+  let params = "";
+  let err = "";
+  $('#errMsg').html('');
+  let rpt_info = $('#iFile').val().split(';')
+  let filename = rpt_info[0];
+  let dsn = rpt_info[1];
+
+  if ($("#pDateRange").is(":visible")) {
+    let  start = $("#txtDateStart").val().replace(/(\d\d)\/(\d\d)\/(\d{4})/, "$3-$1-$2");
+    let  end = $("#txtDateEnd").val().replace(/(\d\d)\/(\d\d)\/(\d{4})/, "$3-$1-$2");
+
+    if (start.trim() == "" || end.trim() == ""){
+        err += "Both dates must be selected<br />";
+    }
+    else 
+    if (Date.parse(start)  > Date.parse(end) ) {
+        err += "The end date cannot be less than start date<br />";
+    }
+    else {
+    params += '-A "Date Range:(' + start + ',' + end +')" ';
+    }
+  }
+
+  if ($("#pFacility").is(":visible")) {
+      let fac = $("#selFacility option:selected" ).text().trim();
+      if (fac.trim() == ''){
+        err += "A facility must be selected<br />";
+      }
+      params += '-A "Facility:' + fac  + '" ';
+   }
+
+   if ($("#pUser").is(":visible")) {
+    let user = $("#txtUser").val()
+    if (user.trim() == ''){
+      err += "A user must be selected<br />";
+    }
+     params += '-A "User:' + user  + '" ';
+  }
+
+  if ($("#pPos").is(":visible")) {
+    let pos = $("#selPosition").children("option:selected").val()
+    if (pos.trim() == ''){
+      err += "A user type must be selected<br />";
+    }
+    params += '-A "Position:' + pos  + '" ';
+ }
+
+ if ($("#pSig").is(":visible")) {
+  let sig = $("#selSignature option:selected" ).text().trim();
+  if (sig.trim() == ''){
+    err += "A signature true or false must be selected<br />";
+  }
+  params += '-A "Signature Required:' + sig  + '" ';
+}
+
+console.log(params + " ; " + err);
+if (err.trim() !== "") {
+    $('#errMsg').html(err);
+    return false;
+}
+else{
+    //params = '-A Fac:DJ -A "Date Range:(05-01-2020,05-30-2020)"'
+    rpt = 'OP1'
+    code = 'Rx'
+
+    $.ajax({
+      type: "POST",
+      url: "{{url_for('report_run')}}",
+      dataType: 'text',
+      data: {
+          'dsn': dsn
+          ,'params': params
+          ,'filename': filename
+      },
+      async: false,
+      success: function (data) {
+        console.log(data);
+        loadReport(data);
+      },
+    complete: function (data) {
+  }
+});
+}
+}
+
+function clear_params(){
+  $("#txtUser").val('');
+  $("#txtDateStart").val('');
+  $("#txtDateEnd").val('');
+  $('#errMsg').html('');
+  $("#selFacility").val('');
+  $("#selSignature").val('');
+}
+
+function get_fac_name_s(){
+}
+
+
+
+</script>
+{% endblock %}

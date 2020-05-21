@@ -36,9 +36,9 @@
             <tr>
                 <th scope="col">Tech</th>
                 <th scope="col">RPH</th>
-                <th scope="col">Reported</th>
+                <th scope="col">Created</th>
                 <th scope="col">Reported By</th>
-                <th scope="col">Occured</th>
+                <th scope="col">Reported</th>
                 <th scope="col" >Reason</th>
             </tr>
         </thead>
@@ -52,13 +52,13 @@
                     <span id='sign_rph' class="cursor-pointer signlink" onclick = "login( '{{ s['rpt_id'] }}', '{{ s['rph_id_sign'] }}', 'R', '{{s['rph_username'] }}')">{{s['rph_name'] }}</a>
             </td>
             <td>
-                    {{ s['discover_date'] }}
+                    {{ s['created_at'] }}
             </td>
             <td class="">
                     {{ s['person_reporting'] }}
             </td>
             <td>
-                    {{ s['occur_date'] }}
+                    {{ s['discover_date'] }}
             </td>
             <td>
                     {{ s['dept'] }} - {{ s['reason'] }} 

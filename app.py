@@ -1,4 +1,5 @@
 import os
+import subprocess
 import collections
 import json
 import pyodbc
@@ -9,6 +10,7 @@ from flask_login import LoginManager, UserMixin, login_required, login_user, log
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import datetime as dt
 # from xlrd import open_workbook
 import urllib 
 import pdfkit
@@ -66,6 +68,13 @@ login_manager.init_app(app)
 general_users = ('Administrator','User')
 pharm_redirect = "iou"
 
+# Report export
+exe = r'C:\inetpub\wwwroot\RxApps\static\exe\crn.exe'
+dsnCIPS = ' CIPS'
+dsnRx = ' Rx'
+reports_path = r'C:\inetpub\wwwroot\RxApps\static\rpt' + '\\'
+export_path = r'C:\inetpub\wwwroot\RxApps\static\export' + '\\'
+rpt_delay = 7
 
 def check_role(roles):
     if session['role'] not in roles:
@@ -123,7 +132,7 @@ def upload():
                 return render_template('upload.html', facility=facility, id_rpt=id_rpt, date_rpt=date_rpt)
             else:
                 flash('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
-                return redirect(request.url)
+                
         else:
             date_rpt = request.form['attDate']
             id_rpt = request.form['attID']
@@ -137,6 +146,9 @@ def upload():
 @app.route("/occur/<rpt_id>", methods=["GET"])
 @login_required
 def occur_get(rpt_id):
+    if 'userid' not in session:
+        return redirect(url_for('login'))
+
     return getOccurItems(rpt_id)
 
 @app.route("/occur", methods=[ "POST"])
@@ -464,6 +476,41 @@ def getOccurItems(rpt_id):
         
     return render_template('occur.html', page_title = page_title, users=user_list, current_id=session['userid'],
                         reasons=reason_list, facilities=facility_list, rpt_id=rpt_id)
+    
+@app.route("/report_viewer/", methods=[ "GET"])
+@login_required
+def report_viewer():
+    page_title = "Report Viewer"
+    pdf_file = 'none'
+    return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file )
+    # return report_viewer_file(rpt)
+
+@app.route("/report_viewer/<rpt>", methods=[ "GET"])
+@login_required
+def report_viewer_file(rpt):
+    page_title = "Report Viewer"
+    return render_template('report_viewer.html',page_title = page_title, pdf_file = rpt  )
+
+@app.route("/report_viewer", methods=[ "POST"])
+@login_required
+def report_run():
+    page_title = "Report Viewer"
+    currentDT = dt.datetime.now()
+    ts = currentDT.strftime("%Y%m%d%H%M%S")
+    filename= request.form['filename'] 
+    rpt = ' -F ' + reports_path + filename + '.rpt'
+    params = request.form['params'];
+    dsn =  ' -S ' + request.form['dsn'];
+    pdf_file = export_path + ts + '_' + filename  + '.pdf '
+    pdf = ' -O '+ pdf_file + ' -E pdf '
+    print(exe  +  dsn + rpt + pdf   + params )
+    subprocess.Popen(exe  +  dsn + rpt + pdf   + params , shell=True)
+    time.sleep(rpt_delay)
+    # print('Path:/report_viewer/' + ts + '_' + request.form['rpt']  + '.pdf ')
+    r = ts + '_' + filename + '.pdf '
+    print('R: ' +r)
+    
+    return(r)
 
 @app.route('/getSearch', methods=['POST'])
 def getSearch():
@@ -560,6 +607,7 @@ def admin_signoff():
         d['discover_date'] = row.DISCOVER_DATE
         d['person_reporting'] = row.PERSON_REPORTING
         d['occur_date'] = row.OCCUR_DATE
+        d['created_at'] = str(row.CREATED_AT)
         d['dept'] = row.DEPT
         d['reason'] = row.REASON
         d['rpt_id'] = row.ID
@@ -770,7 +818,16 @@ def request_loader(request):
         return
     return user
 
-
+@app.errorhandler(500)
+def internal_error(exception):
+    app.logger.exception(exception)
+    file_handler = RotatingFileHandler('C:\inetpub\wwwroot\logs.log', 'a', 1 * 1024 * 1024, 10)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+    app.logger.setLevel(logging.INFO)
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    app.logger.info('microblog startup')
+    return render_template('500.html'), 500 
 
 if __name__ == "__main__":
     handler = RotatingFileHandler('log/info.log', maxBytes=10000, backupCount=1)
@@ -787,3 +844,4 @@ if __name__ == "__main__":
 #     handler.setFormatter(formatter)
 #     app.logger.addHandler(handler)
 #     app.run(host= '0.0.0.0')
+# C:\Python38\python.exe app.py

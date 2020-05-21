@@ -27,6 +27,7 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav mr-auto">
                     <a href="{{url_for('index')}}" class="nav-item nav-link active" id="navOccur">Occurrence</a>
+                    <a href="{{url_for('report_viewer')}}" class="nav-item nav-link active" id="navViewer">Report Viewer</a>
                     {% if current_user.is_authenticated and session['role'] == 'Administrator' %}
                     <div class="nav-item dropdown" id="navAdmin">
                         <a  class="nav-link dropdown-toggle" href="#" id="navAdmin" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
