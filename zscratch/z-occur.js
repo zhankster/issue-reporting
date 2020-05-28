@@ -1,4 +1,6 @@
 <script type="text/javascript">
+
+    
 /* function get_fac_name() {
     let fac = $("#selFac option:selected" ).val();
     $("#txtFac").val(fac);

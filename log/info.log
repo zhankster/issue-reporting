@@ -63,3 +63,5 @@ pyodbc.ProgrammingError: ('42S22', "[42S22] [Microsoft][ODBC SQL Server Driver][
 2020-05-20 11:00:28,955 - app - INFO - hanka logged in successfully
 2020-05-20 11:01:03,806 - app - INFO - hanka logged in successfully
 2020-05-21 07:42:20,928 - app - INFO - hanka logged in successfully
+2020-05-21 14:11:18,543 - app - INFO - hanka logged in successfully
+2020-05-25 08:13:56,091 - app - INFO - hanka logged in successfully

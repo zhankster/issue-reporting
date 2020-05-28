@@ -6,6 +6,17 @@ def report_viewer_file(rpt):
     print('PDF:' + pdf_file)
     # {{url_for('static', filename='rpt/OPP2.pdf')}}
     return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file  )
+# logger = logging.getLogger('werkzeug')
+# handler = logging.FileHandler('log/demo.log')
+# logger.addHandler(handler)
+# logging.basicConfig(filename='log/info.log',
+# level=logging.INFO,
+# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
+# logging.basicConfig(filename='log/error.log',
+# level=logging.ERROR,
+# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
 
 # @app.route("/report_viewer/pdf")
 # @login_required

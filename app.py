@@ -23,16 +23,6 @@ import util as pr
 import logging
 from logging.config import dictConfig
 from logging.handlers import RotatingFileHandler
-# logger = logging.getLogger('werkzeug')
-# handler = logging.FileHandler('log/demo.log')
-# logger.addHandler(handler)
-# logging.basicConfig(filename='log/info.log',
-# level=logging.INFO,
-# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
-
-# logging.basicConfig(filename='log/error.log',
-# level=logging.ERROR,
-# format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 dictConfig({
     'version': 1,
@@ -69,11 +59,15 @@ general_users = ('Administrator','User')
 pharm_redirect = "iou"
 
 # Report export
-exe = r'C:\inetpub\wwwroot\RxApps\static\exe\crn.exe'
+exe = r'C:\inetpub\wwwroot\TestRxApps\static\exe\crn.exe'
+# exe = r'C:\inetpub\wwwroot\RxApps\static\exe\crn.exe'
 dsnCIPS = ' CIPS'
 dsnRx = ' Rx'
-reports_path = r'C:\inetpub\wwwroot\RxApps\static\rpt' + '\\'
-export_path = r'C:\inetpub\wwwroot\RxApps\static\export' + '\\'
+
+# reports_path = r'\\IHSSQL1\CIPS Reports\occurence'+ '\\'
+export_path = r'C:\inetpub\wwwroot\TestRxApps\static\export' + '\\'
+# reports_path = r'D:\Dev\FLW\IHS\_Files\Reports'  + '\\'
+# export_path = r'C:\inetpub\wwwroot\RxApps\static\export' + '\\'
 rpt_delay = 7
 
 def check_role(roles):
@@ -482,8 +476,33 @@ def getOccurItems(rpt_id):
 def report_viewer():
     page_title = "Report Viewer"
     pdf_file = 'none'
-    return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file )
-    # return report_viewer_file(rpt)
+    sql = dbs.get_facilities
+    conn = pyodbc.connect(CIPS_CONNECTION_STRING)
+    cur = conn.cursor()
+    cur.execute(sql) 
+    
+    rows = cur.fetchall()
+    facility_list = []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['id'] = row.ID
+        d['code'] = row.DCODE
+        d['name'] = row.DNAME
+        facility_list.append(d)
+        
+    sql = dbs.get_facilities_name
+    cur.execute(sql) 
+    rows = cur.fetchall()
+    facility_list_name = []
+    for row in rows:
+        d = collections.OrderedDict()
+        d['id'] = row.ID
+        d['code'] = row.DCODE
+        d['name'] = row.DNAME
+        facility_list_name.append(d)
+    
+    return render_template('report_viewer.html',page_title = page_title, pdf_file = pdf_file, 
+        facilities=facility_list, names=facility_list_name  )
 
 @app.route("/report_viewer/<rpt>", methods=[ "GET"])
 @login_required
@@ -498,10 +517,10 @@ def report_run():
     currentDT = dt.datetime.now()
     ts = currentDT.strftime("%Y%m%d%H%M%S")
     filename= request.form['filename'] 
-    rpt = ' -F ' + reports_path + filename + '.rpt'
+    rpt = ' -F ' + '"' + reports_path + filename + '.rpt"'
     params = request.form['params'];
     dsn =  ' -S ' + request.form['dsn'];
-    pdf_file = export_path + ts + '_' + filename  + '.pdf '
+    pdf_file = '"' +export_path + ts + '_' + filename  + '.pdf" '
     pdf = ' -O '+ pdf_file + ' -E pdf '
     print(exe  +  dsn + rpt + pdf   + params )
     subprocess.Popen(exe  +  dsn + rpt + pdf   + params , shell=True)

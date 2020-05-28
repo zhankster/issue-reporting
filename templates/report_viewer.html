@@ -27,19 +27,29 @@
     <div class="col-sm-3 sidenav ">
       <h3>Reports</h3>
       <ul class="">
-        <!-- showParams(filename,name, dsn, dateRange, facility, user, userType, sigReq) -->
+        <!-- showParams(filename,name, dsn, dateRange, facility, username, userType, sigReq) -->
         <li ><a href="#" 
-          onclick="showParams('OP1', 'Occurrences by User', 'Rx', true, true, false, false, false)">
-          Rpt1</a>
+          onclick="showParams('Occ_by_Position', 'Occurrences by Position', 'Rx', true, false, false, true, false)">
+          Occurrences by Position</a>
         </li>
         <li><a href="#"
-          onclick="showParams('Test2.rpt', 'Test Report2', 'Rx', false, true, false, true, true)">
-          Rpt2</a>
+          onclick="showParams('Occ_Detail', 'Occurrence Details', 'Rx', true, false, true, false, false)">
+          Occurrence Details</a>
         </li>
         <li>
             <a href="#" 
-            onclick="showParams('Test3.rpt', 'Test Report4', 'Rx', true, false, true, false, false)">
-            Rpt3</a>
+            onclick="showParams('Occ_by_Reason', 'Occurrences by Reason', 'Rx', true, false, false, false, false)">
+            Occurrences by Reason</a>
+        </li>
+        <li>
+            <a href="#" 
+            onclick="showParams('Occ_by_Facility', 'Occurrences by Facility Code', 'Rx', true, true, false, false, false)">
+            Occurrences by Facility Code</a>
+        </li>
+        <li>
+            <a href="#" 
+            onclick="showParams('Occ_summary', 'Occurrence Total Summaries', 'Rx', true, false, false, false, false)">
+            Occurrence Total Summaries</a>
         </li>
       </ul><br>
     </div>
@@ -82,25 +92,32 @@
                           </div>
                           <div class="form-group row" id="pFacility" style="display: none">
                                 <div class="col-sm-2">
-                                  <label for="selFacility" class="col-form-label">Facility</label>
-                                  <select type="text" class="form-control" id="selFacility" name="selFacility" onchange="get_fac_name_s()">
+                                  <label for="selFacility" class="col-form-label">Facility Code</label>
+                                  <select type="text" class="form-control" id="selFacility" name="selFacility" onchange="get_fac_name()">
                                       <option value=""></option>
-                                      <option value="Dekalb County">DJ</option>
-                                  <option value='MJ'>MJ</option>
                                       {% for f in facilities %}
                                           <option value="{{ f.name }}">{{ f.code }}</option>
                                       {% endfor %}
                                   </select>
                               </div>
-                              <div class="col-sm-4">
-                                  <label for="txtFacSearch" class="col-form-label">&nbsp;</label>
-                                  <input type="text" class="form-control" readonly style="background-color: #fdfdff" id="txtFacSearch" name="txtFacSearch">
+                              <div class="col-sm-5">
+                                  <label for="txtFac" class="col-form-label">&nbsp;</label>
+                                  <input type="text" class="form-control" readonly style="background-color: #fdfdff" id="txtFac" name="txtFac">
+                              </div>
+                          <div class="col-sm-5">
+                                  <label for="selFacility" class="col-form-label">Facility Name</label> 
+                                  <select type="text" class="form-control" id="selFacName" name="selFacName" >
+                                      <option value=""></option>
+                                      {% for f in names%}
+                                          <option value="{{ f.code }}">{{ f.name }}</option>
+                                      {% endfor %}
+                                  </select>
                               </div>
                           </div>
                           <div class="form-group row" id="pUser" style="display: none">
                                 <div class="col-sm-2">
-                                  <label for="txtUser" class="col-form-label">User</label>
-                                  <input type="text" id="txtUser" />
+                                  <label for="txtUsername" class="col-form-label">User</label>
+                                  <input type="text" id="txtUsername" />
                               </div>
                           </div>
                           <div class="form-group row" id="pPosition">
@@ -163,12 +180,12 @@ function loadReport(report){
     $('#dReport').html(data);
 }
 
-function showParams(filename,name, dsn, dateRange, facility, user, userType, sigReq){
+function showParams(filename,name, dsn, dateRange, facility, username, userType, sigReq){
   clear_params();
   $('#hSearch').text('Report Parameters: ' + name);
   dateRange ? $("#pDateRange").show() : $("#pDateRange").hide();
   facility ? $("#pFacility").show() : $("#pFacility").hide();
-  user ? $("#pUser").show() : $("#pUser").hide();
+  username ? $("#pUser").show() : $("#pUser").hide();
   userType ? $("#pPos").show() : $("#pPos").hide();
   sigReq ? $("#pSig").show() : $("#pSig").hide();
   $('#iFile').val(filename + ';' + dsn);
@@ -183,6 +200,7 @@ function run_report(){
   let rpt_info = $('#iFile').val().split(';')
   let filename = rpt_info[0];
   let dsn = rpt_info[1];
+  //$('#errMsg').html("Report Loading...");
 
   if ($("#pDateRange").is(":visible")) {
     let  start = $("#txtDateStart").val().replace(/(\d\d)\/(\d\d)\/(\d{4})/, "$3-$1-$2");
@@ -202,18 +220,31 @@ function run_report(){
 
   if ($("#pFacility").is(":visible")) {
       let fac = $("#selFacility option:selected" ).text().trim();
-      if (fac.trim() == ''){
-        err += "A facility must be selected<br />";
+      let name = $("#selFacName option:selected" ).val().trim();
+      let code = "";
+      if (fac.trim() == '' && name.trim() == ""){
+        err += "A facility code or name must be selected<br />";
       }
-      params += '-A "Facility:' + fac  + '" ';
+      else if (fac.trim() != '' && name.trim() != ""){
+        err += "Only the code or facility name must be selected<br />";
+      }
+
+      if (fac.trim() != ''){
+        code = fac;
+      }
+      else {
+        code = name;
+      }
+      console.log(code);
+      params += '-A "Facility:' + code + '" ';
    }
 
    if ($("#pUser").is(":visible")) {
-    let user = $("#txtUser").val()
-    if (user.trim() == ''){
-      err += "A user must be selected<br />";
-    }
-     params += '-A "User:' + user  + '" ';
+    let user = $("#txtUsername").val()
+    // if (user.trim() == ''){
+    //   err += "A username must be entered<br />";
+    // }
+     params += '-A "Username:' + user  + '" ';
   }
 
   if ($("#pPos").is(":visible")) {
@@ -229,7 +260,7 @@ function run_report(){
   if (sig.trim() == ''){
     err += "A signature true or false must be selected<br />";
   }
-  params += '-A "Signature Required:' + sig  + '" ';
+  params += '-A "Required:' + sig  + '" ';
 }
 
 console.log(params + " ; " + err);
@@ -239,8 +270,7 @@ if (err.trim() !== "") {
 }
 else{
     //params = '-A Fac:DJ -A "Date Range:(05-01-2020,05-30-2020)"'
-    rpt = 'OP1'
-    code = 'Rx'
+    $('#errMsg').html("Report Loading...");
 
     $.ajax({
       type: "POST",
@@ -255,6 +285,7 @@ else{
       success: function (data) {
         console.log(data);
         loadReport(data);
+        $('#mParam').modal('hide');
       },
     complete: function (data) {
   }
@@ -263,16 +294,20 @@ else{
 }
 
 function clear_params(){
-  $("#txtUser").val('');
+  $("#txtUsername").val('');
   $("#txtDateStart").val('');
   $("#txtDateEnd").val('');
   $('#errMsg').html('');
   $("#selFacility").val('');
+  $("#txtFac").val('');
+  $("#selFacName").val('');
   $("#selSignature").val('');
 }
 
-function get_fac_name_s(){
-}
+function get_fac_name() {
+        let fac = $("#selFacility option:selected" ).val();
+        $("#txtFac").val(fac);
+    }
 
 
 

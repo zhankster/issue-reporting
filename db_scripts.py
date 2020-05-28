@@ -310,6 +310,14 @@ get_facilities = """ SELECT
     ORDER BY [DCODE]
 """
 
+get_facilities_name = """ SELECT 
+        [ID]
+        ,[DCODE]
+        ,[DNAME]
+    FROM [dbo].[FAC]
+    ORDER BY [DNAME]
+"""
+
 def reason_codes (filter):
     if filter != "":
         filter = " WHERE CODE LIKE '%" + filter + "%'"
